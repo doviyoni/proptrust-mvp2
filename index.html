@@ -138,11 +138,12 @@
         <a href="/crm.html" class="btn btn-secondary">כניסה ל-CRM</a>
       </div>
 
-      <div class="grid">
-        <div class="card">
-          <h3>מתווכים מורשים בלבד</h3>
-          <p class="small">חיבור רק עם גורמים מאומתים להגברת אמון.</p>
-        </div>
+      <div class="grid" id="homePropertiesGrid">
+  <div class="card">
+    <h3>טוען נכסים...</h3>
+    <p class="small">מושך את הנתונים מהמערכת.</p>
+  </div>
+</div>
         <div class="card">
           <h3>סיורי וידאו ו-360°</h3>
           <p class="small">הצגת נכס עשירה יותר גם למשקיע שלא נמצא פיזית.</p>
@@ -228,7 +229,72 @@
     const form = document.getElementById('leadForm');
     const statusEl = document.getElementById('formStatus');
     const submitBtn = document.getElementById('submitBtn');
+    const homePropertiesGrid = document.getElementById('homePropertiesGrid');
 
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    async function loadHomeProperties() {
+      if (!homePropertiesGrid) return;
+
+      homePropertiesGrid.innerHTML = `
+        <div class="card">
+          <h3>טוען נכסים...</h3>
+          <p class="small">מושך את הנתונים מהמערכת.</p>
+        </div>
+      `;
+
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/properties?select=title,city,price,yield_estimate,has_360,verified,status&status=eq.פורסם&order=created_at.desc&limit=6`,
+          {
+            method: 'GET',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to load properties');
+        }
+
+        const properties = await response.json();
+
+        if (!properties.length) {
+          homePropertiesGrid.innerHTML = `
+            <div class="card">
+              <h3>עדיין אין נכסים זמינים</h3>
+              <p class="small">ברגע שיוזנו נכסים שפורסמו במערכת, הם יופיעו כאן.</p>
+            </div>
+          `;
+          return;
+        }
+
+        homePropertiesGrid.innerHTML = properties.map((property) => `
+          <div class="card">
+            <h3>${escapeHtml(property.title)}</h3>
+            <p class="small">${escapeHtml(property.city || '-')} • ${escapeHtml(property.price || '-')}</p>
+            <p class="small">תשואה: ${escapeHtml(property.yield_estimate || '-')}</p>
+            <p class="small">360°: ${property.has_360 ? 'כן' : 'לא'} | אימות: ${property.verified ? 'כן' : 'לא'}</p>
+          </div>
+        `).join('');
+      } catch (err) {
+        homePropertiesGrid.innerHTML = `
+          <div class="card">
+            <h3>שגיאה בטעינת נכסים</h3>
+            <p class="small">לא ניתן למשוך כרגע את הנתונים מהמערכת.</p>
+          </div>
+        `;
+      }
+    }
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -277,6 +343,7 @@
         submitBtn.disabled = false;
       }
     });
+        loadHomeProperties();
   </script>
 </body>
 </html>
