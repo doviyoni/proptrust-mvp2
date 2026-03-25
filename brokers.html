@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PropTrust Brokers</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: #0f172a;
+      color: white;
+      padding: 24px;
+    }
+    .sidebar h2 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+    .sidebar a {
+      display: block;
+      color: #cbd5e1;
+      text-decoration: none;
+      margin: 14px 0;
+      font-size: 16px;
+    }
+    .sidebar a:hover {
+      color: white;
+    }
+    .main {
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .topbar h1 {
+      margin: 0;
+      font-size: 34px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .card, .form-wrap, .table-wrap {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: #64748b;
+    }
+    .value {
+      font-size: 30px;
+      font-weight: bold;
+    }
+    .form-wrap {
+      margin-top: 24px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    input, textarea, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      font-size: 14px;
+      background: white;
+    }
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+    .full {
+      grid-column: 1 / -1;
+    }
+    .btn {
+      background: #0f172a;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 14px;
+    }
+    .status-line {
+      margin-top: 14px;
+      color: #475569;
+      font-size: 14px;
+    }
+    .error {
+      color: #b91c1c;
+    }
+    .success {
+      color: #166534;
+    }
+    .table-wrap {
+      margin-top: 24px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 16px;
+      text-align: right;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 15px;
+      vertical-align: top;
+    }
+    th {
+      background: #f8fafc;
+      color: #475569;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 13px;
+    }
+    .small {
+      color: #64748b;
+      font-size: 13px;
+    }
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        padding: 16px;
+      }
+      .sidebar a {
+        display: inline-block;
+        margin-left: 16px;
+      }
+      .topbar h1 {
+        font-size: 28px;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>PropTrust</h2>
+      <a href="/crm.html">CRM</a>
+      <a href="/brokers.html">מתווכים</a>
+      <a href="/index.html">חזרה לאתר</a>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h1>ניהול מתווכים</h1>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h3>סה״כ מתווכים</h3>
+          <div class="value" id="brokersCount">-</div>
+        </div>
+      </div>
+
+      <div class="form-wrap">
+        <div class="small">מתווך חדש</div>
+        <h2 style="margin-top:8px;">הוספת מתווך למערכת</h2>
+
+        <form id="brokerForm">
+          <div class="form-grid">
+            <div>
+              <label for="office_name">שם משרד</label>
+              <input id="office_name" name="office_name" required />
+            </div>
+            <div>
+              <label for="broker_name">שם מתווך</label>
+              <input id="broker_name" name="broker_name" required />
+            </div>
+            <div>
+              <label for="license_number">מספר רישיון</label>
+              <input id="license_number" name="license_number" />
+            </div>
+            <div>
+              <label for="phone">טלפון</label>
+              <input id="phone" name="phone" />
+            </div>
+            <div>
+              <label for="email">אימייל</label>
+              <input id="email" name="email" type="email" />
+            </div>
+            <div>
+              <label for="city">עיר</label>
+              <input id="city" name="city" />
+            </div>
+            <div class="full">
+              <label for="notes">הערות</label>
+              <textarea id="notes" name="notes"></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn">שמירת מתווך</button>
+          <div id="formStatus" class="status-line"></div>
+        </form>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>שם משרד</th>
+              <th>שם מתווך</th>
+              <th>רישיון</th>
+              <th>טלפון</th>
+              <th>אימייל</th>
+              <th>עיר</th>
+              <th>סטטוס</th>
+              <th>הערות</th>
+            </tr>
+          </thead>
+          <tbody id="brokersTableBody">
+            <tr>
+              <td colspan="8">טוען נתונים...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://ybpefgbezelkmocrepkt.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_DmUNfsrfSGjcqN89HH-CnQ_SEqhBZ-g';
+
+    const brokerForm = document.getElementById('brokerForm');
+    const formStatus = document.getElementById('formStatus');
+    const brokersTableBody = document.getElementById('brokersTableBody');
+    const brokersCount = document.getElementById('brokersCount');
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    async function loadBrokers() {
+      brokersTableBody.innerHTML = '<tr><td colspan="8">טוען נתונים...</td></tr>';
+
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/brokers?select=*&order=created_at.desc`,
+          {
+            method: 'GET',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Failed to load brokers');
+        }
+
+        const brokers = await response.json();
+        brokersCount.textContent = brokers.length;
+
+        if (!brokers.length) {
+          brokersTableBody.innerHTML = '<tr><td colspan="8">עדיין אין מתווכים במערכת.</td></tr>';
+          return;
+        }
+
+        brokersTableBody.innerHTML = brokers.map(broker => `
+          <tr>
+            <td>${escapeHtml(broker.office_name)}</td>
+            <td>${escapeHtml(broker.broker_name)}</td>
+            <td>${escapeHtml(broker.license_number || '-')}</td>
+            <td>${escapeHtml(broker.phone || '-')}</td>
+            <td>${escapeHtml(broker.email || '-')}</td>
+            <td>${escapeHtml(broker.city || '-')}</td>
+            <td><span class="badge">${escapeHtml(broker.status || 'פעיל')}</span></td>
+            <td>${escapeHtml(broker.notes || '-')}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        brokersTableBody.innerHTML = '<tr><td colspan="8">לא ניתן לטעון נתונים כרגע.</td></tr>';
+      }
+    }
+
+    brokerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      formStatus.textContent = 'שומר...';
+      formStatus.className = 'status-line';
+
+      const formData = new FormData(brokerForm);
+      const payload = {
+        office_name: formData.get('office_name') || '',
+        broker_name: formData.get('broker_name') || '',
+        license_number: formData.get('license_number') || '',
+        phone: formData.get('phone') || '',
+        email: formData.get('email') || '',
+        city: formData.get('city') || '',
+        notes: formData.get('notes') || '',
+        status: 'פעיל'
+      };
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/brokers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Failed to save broker');
+        }
+
+        brokerForm.reset();
+        formStatus.textContent = 'המתווך נשמר בהצלחה.';
+        formStatus.className = 'status-line success';
+        loadBrokers();
+      } catch (err) {
+        formStatus.textContent = 'שמירת המתווך נכשלה.';
+        formStatus.className = 'status-line error';
+      }
+    });
+
+    loadBrokers();
+  </script>
+</body>
+</html>
