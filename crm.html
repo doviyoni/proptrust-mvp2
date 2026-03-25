@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PropTrust CRM</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: #0f172a;
+      color: white;
+      padding: 24px;
+    }
+    .sidebar h2 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+    .sidebar a {
+      display: block;
+      color: #cbd5e1;
+      text-decoration: none;
+      margin: 14px 0;
+      font-size: 16px;
+    }
+    .sidebar a:hover {
+      color: white;
+    }
+    .main {
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .topbar h1 {
+      margin: 0;
+      font-size: 34px;
+    }
+    .btn {
+      background: #0f172a;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: #64748b;
+    }
+    .card .value {
+      font-size: 30px;
+      font-weight: bold;
+    }
+    .table-wrap {
+      margin-top: 28px;
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 16px;
+      text-align: right;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 15px;
+    }
+    th {
+      background: #f8fafc;
+      color: #475569;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      font-size: 13px;
+    }
+    .hot {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .medium {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .closed {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        padding: 16px;
+      }
+      .sidebar a {
+        display: inline-block;
+        margin-left: 16px;
+      }
+      .topbar h1 {
+        font-size: 28px;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>PropTrust CRM</h2>
+      <a href="#">דשבורד</a>
+      <a href="#">לידים</a>
+      <a href="#">נכסים</a>
+      <a href="#">מתווכים</a>
+      <a href="#">משימות</a>
+      <a href="#">אוטומציות</a>
+      <a href="/index.html">חזרה לאתר</a>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h1>ניהול לידים ולקוחות</h1>
+        <button class="btn">ליד חדש</button>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h3>לידים פעילים</h3>
+          <div class="value">18</div>
+        </div>
+        <div class="card">
+          <h3>לידים חמים</h3>
+          <div class="value">6</div>
+        </div>
+        <div class="card">
+          <h3>שיחות להיום</h3>
+          <div class="value">4</div>
+        </div>
+        <div class="card">
+          <h3>עסקאות שנסגרו</h3>
+          <div class="value">2</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>שם</th>
+              <th>סוג</th>
+              <th>עיר</th>
+              <th>מקור</th>
+              <th>שלב</th>
+              <th>סטטוס</th>
+              <th>צעד הבא</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>David Cohen</td>
+              <td>משקיע</td>
+              <td>תל אביב</td>
+              <td>דף נחיתה</td>
+              <td>חדש</td>
+              <td><span class="badge hot">חם</span></td>
+              <td>שיחת היכרות</td>
+            </tr>
+            <tr>
+              <td>Sophie Benhamou</td>
+              <td>משקיעה</td>
+              <td>ירושלים</td>
+              <td>צרפתית</td>
+              <td>תואמה שיחה</td>
+              <td><span class="badge hot">חם</span></td>
+              <td>וידאו נכס</td>
+            </tr>
+            <tr>
+              <td>Yonatan Levy</td>
+              <td>מתווך</td>
+              <td>נתניה</td>
+              <td>LinkedIn</td>
+              <td>בדיקת התאמה</td>
+              <td><span class="badge medium">בינוני</span></td>
+              <td>שליחת הצעה</td>
+            </tr>
+            <tr>
+              <td>Rachel Azulay</td>
+              <td>משקיעה</td>
+              <td>חיפה</td>
+              <td>Referral</td>
+              <td>הצעה נשלחה</td>
+              <td><span class="badge medium">בינוני</span></td>
+              <td>מעקב תוך 48 שעות</td>
+            </tr>
+            <tr>
+              <td>Lior Mizrahi</td>
+              <td>משקיע</td>
+              <td>באר שבע</td>
+              <td>Meta Ads</td>
+              <td>סגור</td>
+              <td><span class="badge closed">סגור</span></td>
+              <td>-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
