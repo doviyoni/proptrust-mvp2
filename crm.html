@@ -136,6 +136,26 @@
       color: #64748b;
       font-size: 13px;
     }
+    select, input {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      font-size: 14px;
+      background: white;
+    }
+    .save-btn {
+      background: #0f172a;
+      color: white;
+      border: none;
+      padding: 9px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .save-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
     @media (max-width: 900px) {
       .layout {
         grid-template-columns: 1fr;
@@ -210,11 +230,12 @@
               <th>טלפון</th>
               <th>אימייל</th>
               <th>הערות</th>
+              <th>עדכון</th>
             </tr>
           </thead>
           <tbody id="leadsTableBody">
             <tr>
-              <td colspan="10">טוען נתונים...</td>
+              <td colspan="11">טוען נתונים...</td>
             </tr>
           </tbody>
         </table>
@@ -232,6 +253,8 @@
     const newLeadsEl = document.getElementById('newLeads');
     const investorLeadsEl = document.getElementById('investorLeads');
     const brokerLeadsEl = document.getElementById('brokerLeads');
+
+    const statusOptions = ['חדש', 'חם', 'בינוני', 'סגור'];
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -252,7 +275,7 @@
     async function loadLeads() {
       crmStatus.textContent = 'טוען לידים...';
       crmStatus.className = 'status-line';
-      leadsTableBody.innerHTML = '<tr><td colspan="10">טוען נתונים...</td></tr>';
+      leadsTableBody.innerHTML = '<tr><td colspan="11">טוען נתונים...</td></tr>';
 
       try {
         const response = await fetch(
@@ -279,7 +302,7 @@
         brokerLeadsEl.textContent = leads.filter(l => (l.lead_type || '') === 'מתווך').length;
 
         if (!leads.length) {
-          leadsTableBody.innerHTML = '<tr><td colspan="10">עדיין אין לידים במערכת.</td></tr>';
+          leadsTableBody.innerHTML = '<tr><td colspan="11">עדיין אין לידים במערכת.</td></tr>';
           crmStatus.textContent = 'אין עדיין לידים. אפשר להשאיר ליד מהאתר הראשי.';
           return;
         }
@@ -299,6 +322,16 @@
             <td>${escapeHtml(lead.phone || '-')}</td>
             <td>${escapeHtml(lead.email || '-')}</td>
             <td>${escapeHtml(lead.notes || '-')}</td>
+            <td>
+              <select id="status-${lead.id}">
+                ${statusOptions.map(option => `
+                  <option value="${escapeHtml(option)}" ${lead.status === option ? 'selected' : ''}>${escapeHtml(option)}</option>
+                `).join('')}
+              </select>
+              <div style="margin-top:8px;">
+                <button class="save-btn" onclick="updateLeadStatus(${lead.id})">שמירה</button>
+              </div>
+            </td>
           </tr>
         `).join('');
 
@@ -306,7 +339,41 @@
       } catch (err) {
         crmStatus.textContent = 'שגיאה בטעינת הלידים מהמערכת.';
         crmStatus.className = 'status-line error';
-        leadsTableBody.innerHTML = '<tr><td colspan="10">לא ניתן לטעון נתונים כרגע.</td></tr>';
+        leadsTableBody.innerHTML = '<tr><td colspan="11">לא ניתן לטעון נתונים כרגע.</td></tr>';
+      }
+    }
+
+    async function updateLeadStatus(leadId) {
+      const select = document.getElementById(`status-${leadId}`);
+      const newStatus = select.value;
+
+      crmStatus.textContent = 'שומר עדכון...';
+      crmStatus.className = 'status-line';
+
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/leads?id=eq.${leadId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({ status: newStatus })
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Failed to update lead');
+        }
+
+        crmStatus.textContent = 'הסטטוס עודכן בהצלחה.';
+        loadLeads();
+      } catch (err) {
+        crmStatus.textContent = 'עדכון הסטטוס נכשל.';
+        crmStatus.className = 'status-line error';
       }
     }
 
