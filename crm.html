@@ -95,6 +95,7 @@
       text-align: right;
       border-bottom: 1px solid #e2e8f0;
       font-size: 15px;
+      vertical-align: top;
     }
     th {
       background: #f8fafc;
@@ -118,6 +119,22 @@
     .closed {
       background: #dbeafe;
       color: #1d4ed8;
+    }
+    .new {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+    .status-line {
+      margin-top: 14px;
+      color: #475569;
+      font-size: 14px;
+    }
+    .error {
+      color: #b91c1c;
+    }
+    .small {
+      color: #64748b;
+      font-size: 13px;
     }
     @media (max-width: 900px) {
       .layout {
@@ -155,27 +172,29 @@
     <main class="main">
       <div class="topbar">
         <h1>ניהול לידים ולקוחות</h1>
-        <button class="btn">ליד חדש</button>
+        <button class="btn" onclick="loadLeads()">רענון</button>
       </div>
 
       <div class="cards">
         <div class="card">
           <h3>לידים פעילים</h3>
-          <div class="value">18</div>
+          <div class="value" id="activeLeads">-</div>
         </div>
         <div class="card">
-          <h3>לידים חמים</h3>
-          <div class="value">6</div>
+          <h3>לידים חדשים</h3>
+          <div class="value" id="newLeads">-</div>
         </div>
         <div class="card">
-          <h3>שיחות להיום</h3>
-          <div class="value">4</div>
+          <h3>משקיעים</h3>
+          <div class="value" id="investorLeads">-</div>
         </div>
         <div class="card">
-          <h3>עסקאות שנסגרו</h3>
-          <div class="value">2</div>
+          <h3>מתווכים</h3>
+          <div class="value" id="brokerLeads">-</div>
         </div>
       </div>
+
+      <div class="status-line" id="crmStatus">טוען לידים...</div>
 
       <div class="table-wrap">
         <table>
@@ -184,62 +203,114 @@
               <th>שם</th>
               <th>סוג</th>
               <th>עיר</th>
+              <th>תקציב</th>
               <th>מקור</th>
               <th>שלב</th>
               <th>סטטוס</th>
-              <th>צעד הבא</th>
+              <th>טלפון</th>
+              <th>אימייל</th>
+              <th>הערות</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="leadsTableBody">
             <tr>
-              <td>David Cohen</td>
-              <td>משקיע</td>
-              <td>תל אביב</td>
-              <td>דף נחיתה</td>
-              <td>חדש</td>
-              <td><span class="badge hot">חם</span></td>
-              <td>שיחת היכרות</td>
-            </tr>
-            <tr>
-              <td>Sophie Benhamou</td>
-              <td>משקיעה</td>
-              <td>ירושלים</td>
-              <td>צרפתית</td>
-              <td>תואמה שיחה</td>
-              <td><span class="badge hot">חם</span></td>
-              <td>וידאו נכס</td>
-            </tr>
-            <tr>
-              <td>Yonatan Levy</td>
-              <td>מתווך</td>
-              <td>נתניה</td>
-              <td>LinkedIn</td>
-              <td>בדיקת התאמה</td>
-              <td><span class="badge medium">בינוני</span></td>
-              <td>שליחת הצעה</td>
-            </tr>
-            <tr>
-              <td>Rachel Azulay</td>
-              <td>משקיעה</td>
-              <td>חיפה</td>
-              <td>Referral</td>
-              <td>הצעה נשלחה</td>
-              <td><span class="badge medium">בינוני</span></td>
-              <td>מעקב תוך 48 שעות</td>
-            </tr>
-            <tr>
-              <td>Lior Mizrahi</td>
-              <td>משקיע</td>
-              <td>באר שבע</td>
-              <td>Meta Ads</td>
-              <td>סגור</td>
-              <td><span class="badge closed">סגור</span></td>
-              <td>-</td>
+              <td colspan="10">טוען נתונים...</td>
             </tr>
           </tbody>
         </table>
       </div>
     </main>
   </div>
+
+  <script>
+    const SUPABASE_URL = 'https://ybpefgbezelkmocrepkt.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_DmUNfsrfSGjcqN89HH-CnQ_SEqhBZ-g';
+
+    const leadsTableBody = document.getElementById('leadsTableBody');
+    const crmStatus = document.getElementById('crmStatus');
+    const activeLeadsEl = document.getElementById('activeLeads');
+    const newLeadsEl = document.getElementById('newLeads');
+    const investorLeadsEl = document.getElementById('investorLeads');
+    const brokerLeadsEl = document.getElementById('brokerLeads');
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function badgeClass(status) {
+      if (status === 'חם') return 'badge hot';
+      if (status === 'בינוני') return 'badge medium';
+      if (status === 'סגור') return 'badge closed';
+      return 'badge new';
+    }
+
+    async function loadLeads() {
+      crmStatus.textContent = 'טוען לידים...';
+      crmStatus.className = 'status-line';
+      leadsTableBody.innerHTML = '<tr><td colspan="10">טוען נתונים...</td></tr>';
+
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/leads?select=*&order=created_at.desc`,
+          {
+            method: 'GET',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Failed to load leads');
+        }
+
+        const leads = await response.json();
+
+        activeLeadsEl.textContent = leads.length;
+        newLeadsEl.textContent = leads.filter(l => (l.stage || '') === 'חדש').length;
+        investorLeadsEl.textContent = leads.filter(l => ['משקיע', 'משקיעה'].includes(l.lead_type)).length;
+        brokerLeadsEl.textContent = leads.filter(l => (l.lead_type || '') === 'מתווך').length;
+
+        if (!leads.length) {
+          leadsTableBody.innerHTML = '<tr><td colspan="10">עדיין אין לידים במערכת.</td></tr>';
+          crmStatus.textContent = 'אין עדיין לידים. אפשר להשאיר ליד מהאתר הראשי.';
+          return;
+        }
+
+        leadsTableBody.innerHTML = leads.map(lead => `
+          <tr>
+            <td>
+              <strong>${escapeHtml(lead.full_name)}</strong>
+              <div class="small">${escapeHtml(new Date(lead.created_at).toLocaleString('he-IL'))}</div>
+            </td>
+            <td>${escapeHtml(lead.lead_type || '-')}</td>
+            <td>${escapeHtml(lead.city || '-')}</td>
+            <td>${escapeHtml(lead.budget || '-')}</td>
+            <td>${escapeHtml(lead.source || '-')}</td>
+            <td>${escapeHtml(lead.stage || '-')}</td>
+            <td><span class="${badgeClass(lead.status)}">${escapeHtml(lead.status || 'חדש')}</span></td>
+            <td>${escapeHtml(lead.phone || '-')}</td>
+            <td>${escapeHtml(lead.email || '-')}</td>
+            <td>${escapeHtml(lead.notes || '-')}</td>
+          </tr>
+        `).join('');
+
+        crmStatus.textContent = `נטענו ${leads.length} לידים מהמערכת.`;
+      } catch (err) {
+        crmStatus.textContent = 'שגיאה בטעינת הלידים מהמערכת.';
+        crmStatus.className = 'status-line error';
+        leadsTableBody.innerHTML = '<tr><td colspan="10">לא ניתן לטעון נתונים כרגע.</td></tr>';
+      }
+    }
+
+    loadLeads();
+  </script>
 </body>
 </html>
