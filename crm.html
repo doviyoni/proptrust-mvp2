@@ -136,12 +136,18 @@
       color: #64748b;
       font-size: 13px;
     }
-    select, input {
+    select, input, textarea {
       padding: 10px;
       border-radius: 10px;
       border: 1px solid #cbd5e1;
       font-size: 14px;
       background: white;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    textarea {
+      min-height: 84px;
+      resize: vertical;
     }
     .save-btn {
       background: #0f172a;
@@ -151,10 +157,15 @@
       border-radius: 10px;
       cursor: pointer;
       font-size: 13px;
+      margin-top: 8px;
+      width: 100%;
     }
     .save-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+    }
+    .edit-box {
+      min-width: 220px;
     }
     @media (max-width: 900px) {
       .layout {
@@ -229,7 +240,7 @@
               <th>סטטוס</th>
               <th>טלפון</th>
               <th>אימייל</th>
-              <th>הערות</th>
+              <th>צעד הבא / הערות פנימיות</th>
               <th>עדכון</th>
             </tr>
           </thead>
@@ -321,16 +332,19 @@
             <td><span class="${badgeClass(lead.status)}">${escapeHtml(lead.status || 'חדש')}</span></td>
             <td>${escapeHtml(lead.phone || '-')}</td>
             <td>${escapeHtml(lead.email || '-')}</td>
-            <td>${escapeHtml(lead.notes || '-')}</td>
+            <td class="edit-box">
+              <div class="small" style="margin-bottom:6px;">צעד הבא</div>
+              <input id="next-step-${lead.id}" value="${escapeHtml(lead.next_step || '')}" placeholder="למשל: שיחה מחר ב-10:00" />
+              <div class="small" style="margin:10px 0 6px;">הערות פנימיות</div>
+              <textarea id="notes-${lead.id}" placeholder="הערות עבודה פנימיות">${escapeHtml(lead.notes || '')}</textarea>
+            </td>
             <td>
               <select id="status-${lead.id}">
                 ${statusOptions.map(option => `
                   <option value="${escapeHtml(option)}" ${lead.status === option ? 'selected' : ''}>${escapeHtml(option)}</option>
                 `).join('')}
               </select>
-              <div style="margin-top:8px;">
-                <button class="save-btn" onclick="updateLeadStatus(${lead.id})">שמירה</button>
-              </div>
+              <button class="save-btn" onclick="updateLead(${lead.id})">שמירה</button>
             </td>
           </tr>
         `).join('');
@@ -343,9 +357,10 @@
       }
     }
 
-    async function updateLeadStatus(leadId) {
-      const select = document.getElementById(`status-${leadId}`);
-      const newStatus = select.value;
+    async function updateLead(leadId) {
+      const statusSelect = document.getElementById(`status-${leadId}`);
+      const nextStepInput = document.getElementById(`next-step-${leadId}`);
+      const notesInput = document.getElementById(`notes-${leadId}`);
 
       crmStatus.textContent = 'שומר עדכון...';
       crmStatus.className = 'status-line';
@@ -360,7 +375,11 @@
               'apikey': SUPABASE_ANON_KEY,
               'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
             },
-            body: JSON.stringify({ status: newStatus })
+            body: JSON.stringify({
+              status: statusSelect.value,
+              next_step: nextStepInput.value,
+              notes: notesInput.value
+            })
           }
         );
 
@@ -369,10 +388,10 @@
           throw new Error(errorText || 'Failed to update lead');
         }
 
-        crmStatus.textContent = 'הסטטוס עודכן בהצלחה.';
+        crmStatus.textContent = 'הליד עודכן בהצלחה.';
         loadLeads();
       } catch (err) {
-        crmStatus.textContent = 'עדכון הסטטוס נכשל.';
+        crmStatus.textContent = 'עדכון הליד נכשל.';
         crmStatus.className = 'status-line error';
       }
     }
