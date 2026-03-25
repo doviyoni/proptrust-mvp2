@@ -45,6 +45,8 @@
       border-radius: 14px;
       text-decoration: none;
       font-weight: bold;
+      border: 0;
+      cursor: pointer;
     }
     .btn-primary {
       background: #0f172a;
@@ -78,6 +80,46 @@
       color: #64748b;
       font-size: 16px;
     }
+    .form-wrap {
+      margin-top: 32px;
+      background: white;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    input, select, textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid #cbd5e1;
+      font-size: 16px;
+      background: white;
+    }
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+    .full {
+      grid-column: 1 / -1;
+    }
+    .status {
+      margin-top: 14px;
+      font-size: 15px;
+      color: #334155;
+    }
+    .success {
+      color: #166534;
+    }
+    .error {
+      color: #b91c1c;
+    }
   </style>
 </head>
 <body>
@@ -92,8 +134,8 @@
       </p>
 
       <div class="buttons">
-        <a href="#" class="btn btn-primary">אני משקיע</a>
-        <a href="#" class="btn btn-secondary">אני מתווך מורשה</a>
+        <a href="#lead-form" class="btn btn-primary">אני משקיע</a>
+        <a href="/crm.html" class="btn btn-secondary">כניסה ל-CRM</a>
       </div>
 
       <div class="grid">
@@ -129,6 +171,112 @@
         </div>
       </div>
     </div>
+
+    <div class="form-wrap" id="lead-form">
+      <div class="small">השארת פרטים</div>
+      <h2 style="margin-top:8px;">רוצה לשמוע על נכסים להשקעה?</h2>
+      <p class="small">השאר פרטים ונחזור אליך עם התאמה ראשונית.</p>
+
+      <form id="leadForm">
+        <div class="form-grid">
+          <div>
+            <label for="full_name">שם מלא</label>
+            <input id="full_name" name="full_name" required />
+          </div>
+          <div>
+            <label for="phone">טלפון</label>
+            <input id="phone" name="phone" required />
+          </div>
+          <div>
+            <label for="email">אימייל</label>
+            <input id="email" name="email" type="email" />
+          </div>
+          <div>
+            <label for="city">עיר מועדפת</label>
+            <input id="city" name="city" />
+          </div>
+          <div>
+            <label for="budget">תקציב</label>
+            <input id="budget" name="budget" placeholder="למשל ₪2,000,000" />
+          </div>
+          <div>
+            <label for="lead_type">סוג פנייה</label>
+            <select id="lead_type" name="lead_type">
+              <option value="משקיע">משקיע</option>
+              <option value="משקיעה">משקיעה</option>
+              <option value="מתווך">מתווך</option>
+            </select>
+          </div>
+          <div class="full">
+            <label for="notes">הערות</label>
+            <textarea id="notes" name="notes" placeholder="מה אתה מחפש? אזור, סוג נכס, תשואה וכדומה"></textarea>
+          </div>
+        </div>
+
+        <div class="buttons">
+          <button type="submit" class="btn btn-primary" id="submitBtn">שליחה</button>
+        </div>
+        <div id="formStatus" class="status"></div>
+      </form>
+    </div>
   </div>
+
+  <script>
+    const SUPABASE_URL = 'https://ybpefgbezelkmocrepkt.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_DmUNfsrfSGjcqN89HH-CnQ_SEqhBZ-g';
+
+    const form = document.getElementById('leadForm');
+    const statusEl = document.getElementById('formStatus');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      statusEl.textContent = 'שולח...';
+      statusEl.className = 'status';
+      submitBtn.disabled = true;
+
+      const formData = new FormData(form);
+      const payload = {
+        full_name: formData.get('full_name') || '',
+        phone: formData.get('phone') || '',
+        email: formData.get('email') || '',
+        city: formData.get('city') || '',
+        budget: formData.get('budget') || '',
+        lead_type: formData.get('lead_type') || 'משקיע',
+        notes: formData.get('notes') || '',
+        source: 'website',
+        stage: 'חדש',
+        status: 'חדש'
+      };
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Failed to save lead');
+        }
+
+        form.reset();
+        statusEl.textContent = 'הפרטים נשלחו בהצלחה.';
+        statusEl.className = 'status success';
+      } catch (err) {
+        statusEl.textContent = 'השליחה נכשלה. ננסה שוב אחרי שנחבר את הטבלה ב-Supabase.';
+        statusEl.className = 'status error';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>
