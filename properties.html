@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PropTrust Properties</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: #0f172a;
+      color: white;
+      padding: 24px;
+    }
+    .sidebar h2 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+    .sidebar a {
+      display: block;
+      color: #cbd5e1;
+      text-decoration: none;
+      margin: 14px 0;
+      font-size: 16px;
+    }
+    .sidebar a:hover {
+      color: white;
+    }
+    .main {
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .topbar h1 {
+      margin: 0;
+      font-size: 34px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .card, .form-wrap, .table-wrap {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: #64748b;
+    }
+    .value {
+      font-size: 30px;
+      font-weight: bold;
+    }
+    .form-wrap {
+      margin-top: 24px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    input, textarea, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      font-size: 14px;
+      background: white;
+    }
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+    .full {
+      grid-column: 1 / -1;
+    }
+    .btn {
+      background: #0f172a;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 14px;
+    }
+    .status-line {
+      margin-top: 14px;
+      color: #475569;
+      font-size: 14px;
+    }
+    .error {
+      color: #b91c1c;
+    }
+    .success {
+      color: #166534;
+    }
+    .table-wrap {
+      margin-top: 24px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 16px;
+      text-align: right;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 15px;
+      vertical-align: top;
+    }
+    th {
+      background: #f8fafc;
+      color: #475569;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+    .verified {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .draft {
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .published {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .small {
+      color: #64748b;
+      font-size: 13px;
+    }
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        padding: 16px;
+      }
+      .sidebar a {
+        display: inline-block;
+        margin-left: 16px;
+      }
+      .topbar h1 {
+        font-size: 28px;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>PropTrust</h2>
+      <a href="/crm.html">CRM</a>
+      <a href="/brokers.html">מתווכים</a>
+      <a href="/properties.html">נכסים</a>
+      <a href="/index.html">חזרה לאתר</a>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h1>ניהול נכסים</h1>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h3>סה״כ נכסים</h3>
+          <div class="value" id="propertiesCount">-</div>
+        </div>
+      </div>
+
+      <div class="form-wrap">
+        <div class="small">נכס חדש</div>
+        <h2 style="margin-top:8px;">הוספת נכס למערכת</h2>
+
+        <form id="propertyForm">
+          <div class="form-grid">
+            <div>
+              <label for="broker_id">מתווך</label>
+              <select id="broker_id" name="broker_id" required>
+                <option value="">טוען מתווכים...</option>
+              </select>
+            </div>
+            <div>
+              <label for="title">כותרת נכס</label>
+              <input id="title" name="title" required />
+            </div>
+            <div>
+              <label for="city">עיר</label>
+              <input id="city" name="city" />
+            </div>
+            <div>
+              <label for="address">כתובת</label>
+              <input id="address" name="address" />
+            </div>
+            <div>
+              <label for="price">מחיר</label>
+              <input id="price" name="price" />
+            </div>
+            <div>
+              <label for="property_type">סוג נכס</label>
+              <input id="property_type" name="property_type" placeholder="למשל דירה / פנטהאוז" />
+            </div>
+            <div>
+              <label for="bedrooms">חדרים</label>
+              <input id="bedrooms" name="bedrooms" />
+            </div>
+            <div>
+              <label for="size_sqm">גודל במ״ר</label>
+              <input id="size_sqm" name="size_sqm" />
+            </div>
+            <div>
+              <label for="yield_estimate">תשואה משוערת</label>
+              <input id="yield_estimate" name="yield_estimate" placeholder="למשל 3.8%" />
+            </div>
+            <div>
+              <label for="has_360">יש 360°?</label>
+              <select id="has_360" name="has_360">
+                <option value="false">לא</option>
+                <option value="true">כן</option>
+              </select>
+            </div>
+            <div>
+              <label for="verified">מאומת?</label>
+              <select id="verified" name="verified">
+                <option value="false">לא</option>
+                <option value="true">כן</option>
+              </select>
+            </div>
+            <div>
+              <label for="status">סטטוס</label>
+              <select id="status" name="status">
+                <option value="טיוטה">טיוטה</option>
+                <option value="פורסם">פורסם</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="description">תיאור</label>
+              <textarea id="description" name="description"></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn">שמירת נכס</button>
+          <div id="formStatus" class="status-line"></div>
+        </form>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>כותרת</th>
+              <th>מתווך</th>
+              <th>עיר</th>
+              <th>מחיר</th>
+              <th>סוג</th>
+              <th>חדרים</th>
+              <th>מ״ר</th>
+              <th>תשואה</th>
+              <th>360°</th>
+              <th>אימות</th>
+              <th>סטטוס</th>
+            </tr>
+          </thead>
+          <tbody id="propertiesTableBody">
+            <tr>
+              <td colspan="11">טוען נתונים...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://ybpefgbezelkmocrepkt.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_DmUNfsrfSGjcqN89HH-CnQ_SEqhBZ-g';
+
+    const propertyForm = document.getElementById('propertyForm');
+    const formStatus = document.getElementById('formStatus');
+    const propertiesTableBody = document.getElementById('propertiesTableBody');
+    const propertiesCount = document.getElementById('propertiesCount');
+    const brokerSelect = document.getElementById('broker_id');
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('\"', '&quot;')
+        .replaceAll(\"'\", '&#039;');
+    }
+
+    function statusBadge(status, verified) {
+      if (verified === true) return '<span class=\"badge verified\">מאומת</span>';
+      if (status === 'פורסם') return '<span class=\"badge published\">פורסם</span>';
+      return '<span class=\"badge draft\">טיוטה</span>';
+    }
+
+    async function loadBrokersForSelect() {
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/brokers?select=id,office_name,broker_name&order=created_at.desc`,
+          {
+            method: 'GET',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+
+        if (!response.ok) throw new Error('Failed to load brokers');
+
+        const brokers = await response.json();
+
+        if (!brokers.length) {
+          brokerSelect.innerHTML = '<option value=\"\">אין מתווכים זמינים</option>';
+          return;
+        }
+
+        brokerSelect.innerHTML = '<option value=\"\">בחר מתווך</option>' + brokers.map(b =>
+          `<option value=\"${b.id}\">${escapeHtml(b.office_name)} - ${escapeHtml(b.broker_name)}</option>`
+        ).join('');
+      } catch (err) {
+        brokerSelect.innerHTML = '<option value=\"\">שגיאה בטעינת מתווכים</option>';
+      }
+    }
+
+    async function loadProperties() {
+      propertiesTableBody.innerHTML = '<tr><td colspan=\"11\">טוען נתונים...</td></tr>';
+
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/properties?select=*,brokers(office_name,broker_name)&order=created_at.desc`,
+          {
+            method: 'GET',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Failed to load properties');
+        }
+
+        const properties = await response.json();
+        propertiesCount.textContent = properties.length;
+
+        if (!properties.length) {
+          propertiesTableBody.innerHTML = '<tr><td colspan=\"11\">עדיין אין נכסים במערכת.</td></tr>';
+          return;
+        }
+
+        propertiesTableBody.innerHTML = properties.map(property => `
+          <tr>
+            <td>${escapeHtml(property.title)}</td>
+            <td>${escapeHtml(property.brokers?.office_name || '-')}${property.brokers?.broker_name ? `<div class=\"small\">${escapeHtml(property.brokers.broker_name)}</div>` : ''}</td>
+            <td>${escapeHtml(property.city || '-')}</td>
+            <td>${escapeHtml(property.price || '-')}</td>
+            <td>${escapeHtml(property.property_type || '-')}</td>
+            <td>${escapeHtml(property.bedrooms || '-')}</td>
+            <td>${escapeHtml(property.size_sqm || '-')}</td>
+            <td>${escapeHtml(property.yield_estimate || '-')}</td>
+            <td>${property.has_360 ? 'כן' : 'לא'}</td>
+            <td>${property.verified ? 'כן' : 'לא'}</td>
+            <td>${statusBadge(property.status, property.verified)}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        propertiesTableBody.innerHTML = '<tr><td colspan=\"11\">לא ניתן לטעון נתונים כרגע.</td></tr>';
+      }
+    }
+
+    propertyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      formStatus.textContent = 'שומר...';
+      formStatus.className = 'status-line';
+
+      const formData = new FormData(propertyForm);
+      const payload = {
+        broker_id: Number(formData.get('broker_id')),
+        title: formData.get('title') || '',
+        city: formData.get('city') || '',
+        address: formData.get('address') || '',
+        price: formData.get('price') || '',
+        property_type: formData.get('property_type') || '',
+        bedrooms: formData.get('bedrooms') || '',
+        size_sqm: formData.get('size_sqm') || '',
+        yield_estimate: formData.get('yield_estimate') || '',
+        has_360: formData.get('has_360') === 'true',
+        verified: formData.get('verified') === 'true',
+        description: formData.get('description') || '',
+        status: formData.get('status') || 'טיוטה'
+      };
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/properties`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Failed to save property');
+        }
+
+        propertyForm.reset();
+        formStatus.textContent = 'הנכס נשמר בהצלחה.';
+        formStatus.className = 'status-line success';
+        loadProperties();
+      } catch (err) {
+        formStatus.textContent = 'שמירת הנכס נכשלה.';
+        formStatus.className = 'status-line error';
+      }
+    });
+
+    loadBrokersForSelect();
+    loadProperties();
+  </script>
+</body>
+</html>
