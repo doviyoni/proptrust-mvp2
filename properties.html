@@ -95,15 +95,22 @@
     .full {
       grid-column: 1 / -1;
     }
-    .btn {
-      background: #0f172a;
-      color: white;
+    .btn, .secondary-btn {
       border: none;
       padding: 12px 18px;
       border-radius: 12px;
       cursor: pointer;
       font-weight: bold;
       margin-top: 14px;
+    }
+    .btn {
+      background: #0f172a;
+      color: white;
+    }
+    .secondary-btn {
+      background: #e2e8f0;
+      color: #0f172a;
+      margin-right: 8px;
     }
     .status-line {
       margin-top: 14px;
@@ -157,6 +164,15 @@
       color: #64748b;
       font-size: 13px;
     }
+    .action-btn {
+      background: #0f172a;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+    }
     @media (max-width: 900px) {
       .layout {
         grid-template-columns: 1fr;
@@ -200,10 +216,12 @@
       </div>
 
       <div class="form-wrap">
-        <div class="small">נכס חדש</div>
-        <h2 style="margin-top:8px;">הוספת נכס למערכת</h2>
+        <div class="small" id="formModeLabel">נכס חדש</div>
+        <h2 style="margin-top:8px;" id="formTitle">הוספת נכס למערכת</h2>
 
         <form id="propertyForm">
+          <input type="hidden" id="property_id" name="property_id" />
+
           <div class="form-grid">
             <div>
               <label for="broker_id">מתווך</label>
@@ -270,7 +288,8 @@
             </div>
           </div>
 
-          <button type="submit" class="btn">שמירת נכס</button>
+          <button type="submit" class="btn" id="saveBtn">שמירת נכס</button>
+          <button type="button" class="secondary-btn" id="cancelEditBtn" style="display:none;">ביטול עריכה</button>
           <div id="formStatus" class="status-line"></div>
         </form>
       </div>
@@ -290,11 +309,12 @@
               <th>360°</th>
               <th>אימות</th>
               <th>סטטוס</th>
+              <th>פעולה</th>
             </tr>
           </thead>
           <tbody id="propertiesTableBody">
             <tr>
-              <td colspan="11">טוען נתונים...</td>
+              <td colspan="12">טוען נתונים...</td>
             </tr>
           </tbody>
         </table>
@@ -303,175 +323,236 @@
   </div>
 
   <script>
-  const SUPABASE_URL = 'https://ybpefgbezelkmocrepkt.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_DmUNfsrfSGjcqN89HH-CnQ_SEqhBZ-g';
+    const SUPABASE_URL = 'https://ybpefgbezelkmocrepkt.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_DmUNfsrfSGjcqN89HH-CnQ_SEqhBZ-g';
 
-  const propertyForm = document.getElementById('propertyForm');
-  const formStatus = document.getElementById('formStatus');
-  const propertiesTableBody = document.getElementById('propertiesTableBody');
-  const propertiesCount = document.getElementById('propertiesCount');
-  const brokerSelect = document.getElementById('broker_id');
+    const propertyForm = document.getElementById('propertyForm');
+    const formStatus = document.getElementById('formStatus');
+    const propertiesTableBody = document.getElementById('propertiesTableBody');
+    const propertiesCount = document.getElementById('propertiesCount');
+    const brokerSelect = document.getElementById('broker_id');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const formModeLabel = document.getElementById('formModeLabel');
+    const formTitle = document.getElementById('formTitle');
+    const saveBtn = document.getElementById('saveBtn');
 
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
-  }
+    let brokersMap = {};
+    let propertiesCache = [];
 
-  function statusBadge(status, verified) {
-    if (verified === true) return '<span class="badge verified">מאומת</span>';
-    if (status === 'פורסם') return '<span class="badge published">פורסם</span>';
-    return '<span class="badge draft">טיוטה</span>';
-  }
-
-  async function loadBrokersForSelect() {
-    brokerSelect.innerHTML = '<option value="">טוען מתווכים...</option>';
-
-    try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/brokers?select=id,office_name,broker_name&order=created_at.desc`,
-        {
-          method: 'GET',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to load brokers');
-      }
-
-      const brokers = await response.json();
-
-      if (!brokers.length) {
-        brokerSelect.innerHTML = '<option value="">אין מתווכים זמינים</option>';
-        return;
-      }
-
-      brokerSelect.innerHTML =
-        '<option value="">בחר מתווך</option>' +
-        brokers
-          .map(
-            (b) =>
-              `<option value="${b.id}">${escapeHtml(b.office_name)} - ${escapeHtml(b.broker_name)}</option>`
-          )
-          .join('');
-    } catch (err) {
-      brokerSelect.innerHTML = '<option value="">שגיאה בטעינת מתווכים</option>';
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
     }
-  }
 
-  async function loadProperties() {
-    propertiesTableBody.innerHTML = '<tr><td colspan="11">טוען נתונים...</td></tr>';
-
-    try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/properties?select=*,brokers(office_name,broker_name)&order=created_at.desc`,
-        {
-          method: 'GET',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to load properties');
-      }
-
-      const properties = await response.json();
-      propertiesCount.textContent = properties.length;
-
-      if (!properties.length) {
-        propertiesTableBody.innerHTML = '<tr><td colspan="11">עדיין אין נכסים במערכת.</td></tr>';
-        return;
-      }
-
-      propertiesTableBody.innerHTML = properties
-        .map(
-          (property) => `
-          <tr>
-            <td>${escapeHtml(property.title)}</td>
-            <td>
-              ${escapeHtml(property.brokers?.office_name || '-')}
-              ${property.brokers?.broker_name ? `<div class="small">${escapeHtml(property.brokers.broker_name)}</div>` : ''}
-            </td>
-            <td>${escapeHtml(property.city || '-')}</td>
-            <td>${escapeHtml(property.price || '-')}</td>
-            <td>${escapeHtml(property.property_type || '-')}</td>
-            <td>${escapeHtml(property.bedrooms || '-')}</td>
-            <td>${escapeHtml(property.size_sqm || '-')}</td>
-            <td>${escapeHtml(property.yield_estimate || '-')}</td>
-            <td>${property.has_360 ? 'כן' : 'לא'}</td>
-            <td>${property.verified ? 'כן' : 'לא'}</td>
-            <td>${statusBadge(property.status, property.verified)}</td>
-          </tr>
-        `
-        )
-        .join('');
-    } catch (err) {
-      propertiesTableBody.innerHTML = '<tr><td colspan="11">לא ניתן לטעון נתונים כרגע.</td></tr>';
+    function statusBadge(status, verified) {
+      if (verified === true) return '<span class="badge verified">מאומת</span>';
+      if (status === 'פורסם') return '<span class="badge published">פורסם</span>';
+      return '<span class="badge draft">טיוטה</span>';
     }
-  }
 
-  propertyForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    formStatus.textContent = 'שומר...';
-    formStatus.className = 'status-line';
-
-    const formData = new FormData(propertyForm);
-    const payload = {
-      broker_id: Number(formData.get('broker_id')),
-      title: formData.get('title') || '',
-      city: formData.get('city') || '',
-      address: formData.get('address') || '',
-      price: formData.get('price') || '',
-      property_type: formData.get('property_type') || '',
-      bedrooms: formData.get('bedrooms') || '',
-      size_sqm: formData.get('size_sqm') || '',
-      yield_estimate: formData.get('yield_estimate') || '',
-      has_360: formData.get('has_360') === 'true',
-      verified: formData.get('verified') === 'true',
-      description: formData.get('description') || '',
-      status: formData.get('status') || 'טיוטה'
-    };
-
-    try {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/properties`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to save property');
-      }
-
+    function resetFormToCreateMode() {
       propertyForm.reset();
-      formStatus.textContent = 'הנכס נשמר בהצלחה.';
-      formStatus.className = 'status-line success';
-      loadProperties();
-    } catch (err) {
-      formStatus.textContent = 'שמירת הנכס נכשלה.';
-      formStatus.className = 'status-line error';
+      document.getElementById('property_id').value = '';
+      formModeLabel.textContent = 'נכס חדש';
+      formTitle.textContent = 'הוספת נכס למערכת';
+      saveBtn.textContent = 'שמירת נכס';
+      cancelEditBtn.style.display = 'none';
+      formStatus.textContent = '';
     }
-  });
 
-  loadBrokersForSelect();
-  loadProperties();
-</script>
+    function fillFormForEdit(property) {
+      document.getElementById('property_id').value = property.id || '';
+      document.getElementById('broker_id').value = property.broker_id || '';
+      document.getElementById('title').value = property.title || '';
+      document.getElementById('city').value = property.city || '';
+      document.getElementById('address').value = property.address || '';
+      document.getElementById('price').value = property.price || '';
+      document.getElementById('property_type').value = property.property_type || '';
+      document.getElementById('bedrooms').value = property.bedrooms || '';
+      document.getElementById('size_sqm').value = property.size_sqm || '';
+      document.getElementById('yield_estimate').value = property.yield_estimate || '';
+      document.getElementById('has_360').value = String(property.has_360);
+      document.getElementById('verified').value = String(property.verified);
+      document.getElementById('status').value = property.status || 'טיוטה';
+      document.getElementById('description').value = property.description || '';
+
+      formModeLabel.textContent = 'עריכת נכס';
+      formTitle.textContent = 'עדכון נכס קיים';
+      saveBtn.textContent = 'שמירת שינויים';
+      cancelEditBtn.style.display = 'inline-block';
+      formStatus.textContent = 'ערכת נכס קיים. עדכן ושמור.';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function loadBrokersForSelect() {
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/brokers?select=id,office_name,broker_name&order=created_at.desc`,
+          {
+            method: 'GET',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+
+        if (!response.ok) throw new Error('Failed to load brokers');
+
+        const brokers = await response.json();
+
+        brokersMap = {};
+        brokers.forEach((b) => {
+          brokersMap[b.id] = b;
+        });
+
+        if (!brokers.length) {
+          brokerSelect.innerHTML = '<option value="">אין מתווכים זמינים</option>';
+          return;
+        }
+
+        brokerSelect.innerHTML = '<option value="">בחר מתווך</option>' + brokers.map(b =>
+          `<option value="${b.id}">${escapeHtml(b.office_name)} - ${escapeHtml(b.broker_name)}</option>`
+        ).join('');
+      } catch (err) {
+        brokerSelect.innerHTML = '<option value="">שגיאה בטעינת מתווכים</option>';
+      }
+    }
+
+    async function loadProperties() {
+      propertiesTableBody.innerHTML = '<tr><td colspan="12">טוען נתונים...</td></tr>';
+
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/properties?select=*&order=created_at.desc`,
+          {
+            method: 'GET',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Failed to load properties');
+        }
+
+        const properties = await response.json();
+        propertiesCache = properties;
+        propertiesCount.textContent = properties.length;
+
+        if (!properties.length) {
+          propertiesTableBody.innerHTML = '<tr><td colspan="12">עדיין אין נכסים במערכת.</td></tr>';
+          return;
+        }
+
+        propertiesTableBody.innerHTML = properties.map(property => {
+          const broker = brokersMap[property.broker_id];
+          return `
+            <tr>
+              <td>${escapeHtml(property.title)}</td>
+              <td>
+                ${escapeHtml(broker?.office_name || '-')}
+                ${broker?.broker_name ? `<div class="small">${escapeHtml(broker.broker_name)}</div>` : ''}
+              </td>
+              <td>${escapeHtml(property.city || '-')}</td>
+              <td>${escapeHtml(property.price || '-')}</td>
+              <td>${escapeHtml(property.property_type || '-')}</td>
+              <td>${escapeHtml(property.bedrooms || '-')}</td>
+              <td>${escapeHtml(property.size_sqm || '-')}</td>
+              <td>${escapeHtml(property.yield_estimate || '-')}</td>
+              <td>${property.has_360 ? 'כן' : 'לא'}</td>
+              <td>${property.verified ? 'כן' : 'לא'}</td>
+              <td>${statusBadge(property.status, property.verified)}</td>
+              <td><button class="action-btn" onclick="editProperty(${property.id})">עריכה</button></td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        propertiesTableBody.innerHTML = '<tr><td colspan="12">לא ניתן לטעון נתונים כרגע.</td></tr>';
+      }
+    }
+
+    function editProperty(propertyId) {
+      const property = propertiesCache.find((p) => Number(p.id) === Number(propertyId));
+      if (!property) return;
+      fillFormForEdit(property);
+    }
+
+    cancelEditBtn.addEventListener('click', () => {
+      resetFormToCreateMode();
+    });
+
+    propertyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      formStatus.textContent = 'שומר...';
+      formStatus.className = 'status-line';
+
+      const formData = new FormData(propertyForm);
+      const propertyId = formData.get('property_id');
+
+      const payload = {
+        broker_id: Number(formData.get('broker_id')),
+        title: formData.get('title') || '',
+        city: formData.get('city') || '',
+        address: formData.get('address') || '',
+        price: formData.get('price') || '',
+        property_type: formData.get('property_type') || '',
+        bedrooms: formData.get('bedrooms') || '',
+        size_sqm: formData.get('size_sqm') || '',
+        yield_estimate: formData.get('yield_estimate') || '',
+        has_360: formData.get('has_360') === 'true',
+        verified: formData.get('verified') === 'true',
+        description: formData.get('description') || '',
+        status: formData.get('status') || 'טיוטה'
+      };
+
+      try {
+        const isEdit = !!propertyId;
+        const url = isEdit
+          ? `${SUPABASE_URL}/rest/v1/properties?id=eq.${propertyId}`
+          : `${SUPABASE_URL}/rest/v1/properties`;
+
+        const response = await fetch(url, {
+          method: isEdit ? 'PATCH' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Failed to save property');
+        }
+
+        formStatus.textContent = isEdit ? 'הנכס עודכן בהצלחה.' : 'הנכס נשמר בהצלחה.';
+        formStatus.className = 'status-line success';
+        resetFormToCreateMode();
+        await loadProperties();
+      } catch (err) {
+        formStatus.textContent = 'שמירת הנכס נכשלה.';
+        formStatus.className = 'status-line error';
+      }
+    });
+
+    async function initPage() {
+      await loadBrokersForSelect();
+      await loadProperties();
+      resetFormToCreateMode();
+    }
+
+    initPage();
+  </script>
+</body>
+</html>
