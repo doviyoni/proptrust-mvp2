@@ -716,6 +716,111 @@
         border-radius: 24px;
       }
     }
+    .premium-hero-grid {
+  align-items: center;
+}
+
+.premium-hero-right {
+  display: flex;
+  align-items: stretch;
+}
+
+.hero-image-card {
+  position: relative;
+  width: 100%;
+  min-height: 620px;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 28px 60px rgba(15,23,42,0.18);
+  background: #dbe4ee;
+}
+
+.hero-main-image {
+  width: 100%;
+  height: 100%;
+  min-height: 620px;
+  object-fit: cover;
+  display: block;
+}
+
+.floating-card {
+  position: absolute;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255,255,255,0.86);
+  border: 1px solid rgba(255,255,255,0.45);
+  box-shadow: 0 18px 40px rgba(15,23,42,0.14);
+  border-radius: 24px;
+  padding: 18px 20px;
+}
+
+.floating-card-top {
+  top: 22px;
+  right: 22px;
+  max-width: 320px;
+}
+
+.floating-card-bottom {
+  left: 22px;
+  bottom: 22px;
+  min-width: 260px;
+  display: grid;
+  gap: 10px;
+}
+
+.floating-label {
+  font-size: 12px;
+  color: #1d4ed8;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.floating-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.floating-sub {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.premium-points .point {
+  background: rgba(255,255,255,0.88);
+}
+
+@media (max-width: 1100px) {
+  .hero-image-card,
+  .hero-main-image {
+    min-height: 460px;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero-image-card,
+  .hero-main-image {
+    min-height: 380px;
+  }
+
+  .floating-card-top,
+  .floating-card-bottom {
+    right: 14px;
+    left: 14px;
+    max-width: none;
+    min-width: auto;
+  }
+
+  .floating-card-bottom {
+    bottom: 14px;
+  }
+
+  .floating-card-top {
+    top: 14px;
+  }
+}
   </style>
 </head>
 <body>
@@ -743,65 +848,64 @@
 
     <div class="container">
       <section class="hero">
-        <div class="hero-grid">
-          <div class="hero-left">
-            <div class="eyebrow">PropTrust MVP · השקעה חכמה יותר</div>
-            <h1>נכסים להשקעה עם יותר אמון, יותר שקיפות ופחות סימני שאלה</h1>
-            <p>
-              פלטפורמה שמחברת בין משקיעים למתווכים מורשים בלבד, עם הצגת נכס אחידה,
-              360°, וידאו ושכבת אמינות שמאפשרת לקבל החלטה טובה יותר גם מרחוק.
-            </p>
+  <div class="hero-grid premium-hero-grid">
+    <div class="hero-left">
+      <div class="eyebrow">PropTrust Signature · השקעות נדל״ן מרחוק</div>
+      <h1>פלטפורמת פרימיום למשקיעים שרוצים ודאות, נראות ואמון גבוה יותר</h1>
+      <p>
+        PropTrust מחברת בין משקיעים לבין נכסים נבחרים דרך מתווכים מורשים בלבד,
+        עם חוויית צפייה יוקרתית, נתונים ברורים ושכבת אמון שמרגישה הרבה יותר מקצועית.
+      </p>
 
-            <div class="hero-actions">
-              <a href="#lead-form" class="btn btn-primary">אני משקיע</a>
-              <a href="#properties" class="btn btn-secondary">לצפייה בנכסים</a>
-            </div>
+      <div class="hero-actions">
+        <a href="#properties" class="btn btn-primary">לצפייה בנכסים</a>
+        <a href="#lead-form" class="btn btn-secondary">השארת פרטים</a>
+      </div>
 
-            <div class="hero-points">
-              <div class="point">
-                <div class="point-title">מתווכים מורשים בלבד</div>
-                <div class="point-text">חיבור רק עם גורמים מאומתים שמחזקים את תחושת הביטחון.</div>
-              </div>
-              <div class="point">
-                <div class="point-title">שקיפות למשקיע מרחוק</div>
-                <div class="point-text">מבנה קבוע וברור שמאפשר להבין מהר אם הנכס מתאים.</div>
-              </div>
-              <div class="point">
-                <div class="point-title">360° ונתוני בסיס</div>
-                <div class="point-text">הצגת נכס עשירה יותר לפני שיחה, פגישה או ביקור בנכס.</div>
-              </div>
-            </div>
+      <div class="hero-points premium-points">
+        <div class="point">
+          <div class="point-title">נכסים ברמת הצגה גבוהה</div>
+          <div class="point-text">כרטיסי נכס ברורים יותר, עם דגש על פרטים שבאמת עוזרים להחליט.</div>
+        </div>
+        <div class="point">
+          <div class="point-title">אמון לפני הכול</div>
+          <div class="point-text">עבודה עם מתווכים מורשים בלבד ושפה שמכוונת לשקיפות.</div>
+        </div>
+        <div class="point">
+          <div class="point-title">חוויה שמתאימה למשקיע רציני</div>
+          <div class="point-text">מראה מדויק יותר, מסודר יותר, ומרגיש הרבה פחות “לוח מודעות”.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right premium-hero-right">
+      <div class="hero-image-card">
+        <img
+          src="https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80"
+          alt="Luxury real estate"
+          class="hero-main-image"
+        />
+
+        <div class="floating-card floating-card-top">
+          <div class="floating-label">נכס פרימיום</div>
+          <div class="floating-title">תל אביב · השקעה עם נראות גבוהה</div>
+          <div class="floating-sub">מתווך מורשה · נתוני בסיס · הצגה איכותית</div>
+        </div>
+
+        <div class="floating-card floating-card-bottom">
+          <div class="mini-stat">
+            <div class="mini-stat-label">מתווכים פעילים</div>
+            <div class="mini-stat-value" id="heroBrokerCount">—</div>
           </div>
-
-          <div class="hero-right">
-            <div class="hero-side-card">
-              <div>
-                <div class="side-badge">השקעה מרחוק, בלי כאב ראש</div>
-                <div class="side-title">תהליך חכם יותר למשקיע שמחפש ודאות</div>
-                <div class="side-text">
-                  במקום לרדוף אחרי מידע חלקי, אתה מקבל תצוגה אחידה יותר, נכסים רלוונטיים,
-                  ותהליך שמכוון לאמון ולא רק לפרסום.
-                </div>
-              </div>
-
-              <div class="mini-stats">
-                <div class="mini-stat">
-                  <div class="mini-stat-label">גישה לנכסים</div>
-                  <div class="mini-stat-value">24/7</div>
-                </div>
-                <div class="mini-stat">
-                  <div class="mini-stat-label">מתווכים פעילים</div>
-                  <div class="mini-stat-value" id="heroBrokerCount">—</div>
-                </div>
-                <div class="mini-stat">
-                  <div class="mini-stat-label">נכסים שפורסמו</div>
-                  <div class="mini-stat-value" id="heroPropertyCount">—</div>
-                </div>
-              </div>
-            </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">נכסים שפורסמו</div>
+            <div class="mini-stat-value" id="heroPropertyCount">—</div>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
+</section>
 
       <section class="section" id="how-it-works">
         <div class="section-head">
