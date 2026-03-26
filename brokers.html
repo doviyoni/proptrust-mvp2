@@ -254,6 +254,9 @@
   </div>
 
   <script>
+        if (localStorage.getItem('proptrust_logged_in') !== 'true') {
+      window.location.href = '/login.html';
+    }
     const SUPABASE_URL = 'https://ybpefgbezelkmocrepkt.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_DmUNfsrfSGjcqN89HH-CnQ_SEqhBZ-g';
 
