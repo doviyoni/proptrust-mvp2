@@ -1114,55 +1114,59 @@ overflow: hidden;
           return;
         }
 
-        homePropertiesGrid.innerHTML = properties.map((property) => `
-                   <article class="property-card">
-            <div class="property-visual">
-  ${property.image_url
+        homePropertiesGrid.innerHTML = properties.map((property) => {
+  const imageHtml = property.image_url
     ? `<img src="${escapeHtml(property.image_url)}" alt="${escapeHtml(property.title)}" class="property-image" />`
-    : ''}
-  <div class="property-visual-overlay"></div>
-  <div class="property-badges">
-    <span class="property-badge primary">${property.verified ? 'מאומת' : 'בתהליך אימות'}</span>
-    <span class="property-badge">${property.has_360 ? 'כולל 360°' : 'ללא 360°'}</span>
-  </div>
-  <div class="property-badge">${escapeHtml(property.property_type || 'נכס')}</div>
-</div>
+    : '';
 
-            <div class="property-content">
-              <div>
-                <h3 class="property-title">${escapeHtml(property.title)}</h3>
-                <p class="property-sub">${escapeHtml(property.city || '-')} • ${escapeHtml(property.price || '-')}</p>
-              </div>
+  return `
+    <article class="property-card">
+      <div class="property-visual">
+        ${imageHtml}
+        <div class="property-visual-overlay"></div>
+        <div class="property-badges">
+          <span class="property-badge primary">${property.verified ? 'מאומת' : 'בתהליך אימות'}</span>
+          <span class="property-badge">${property.has_360 ? 'כולל 360°' : 'ללא 360°'}</span>
+        </div>
+        <div class="property-badge">${escapeHtml(property.property_type || 'נכס')}</div>
+      </div>
 
-              <div class="property-metrics">
-                <div class="metric">
-                  <div class="metric-label">תשואה משוערת</div>
-                  <div class="metric-value">${escapeHtml(property.yield_estimate || '-')}</div>
-                </div>
+      <div class="property-content">
+        <div>
+          <h3 class="property-title">${escapeHtml(property.title)}</h3>
+          <p class="property-sub">${escapeHtml(property.city || '-')} • ${escapeHtml(property.price || '-')}</p>
+        </div>
 
-                <div class="metric">
-                  <div class="metric-label">חדרים</div>
-                  <div class="metric-value">${escapeHtml(property.bedrooms || '-')}</div>
-                </div>
+        <div class="property-metrics">
+          <div class="metric">
+            <div class="metric-label">תשואה משוערת</div>
+            <div class="metric-value">${escapeHtml(property.yield_estimate || '-')}</div>
+          </div>
 
-                <div class="metric">
-                  <div class="metric-label">גודל במ״ר</div>
-                  <div class="metric-value">${escapeHtml(property.size_sqm || '-')}</div>
-                </div>
+          <div class="metric">
+            <div class="metric-label">חדרים</div>
+            <div class="metric-value">${escapeHtml(property.bedrooms || '-')}</div>
+          </div>
 
-                <div class="metric">
-                  <div class="metric-label">סטטוס</div>
-                  <div class="metric-value">${escapeHtml(property.status || '-')}</div>
-                </div>
-              </div>
+          <div class="metric">
+            <div class="metric-label">גודל במ״ר</div>
+            <div class="metric-value">${escapeHtml(property.size_sqm || '-')}</div>
+          </div>
 
-              <div class="chips" style="margin-top:auto;">
-                <div class="chip">נראות גבוהה</div>
-                <div class="chip">השוואה מושווית</div>
-              </div>
-            </div>
-          </article>
-        `).join('');
+          <div class="metric">
+            <div class="metric-label">סטטוס</div>
+            <div class="metric-value">${escapeHtml(property.status || '-')}</div>
+          </div>
+        </div>
+
+        <div class="chips" style="margin-top:auto;">
+          <div class="chip">נראות גבוהה</div>
+          <div class="chip">השוואה מושווית</div>
+        </div>
+      </div>
+    </article>
+  `;
+}).join('');
       } catch (err) {
         homePropertiesGrid.innerHTML = `
           <div class="property-error">
