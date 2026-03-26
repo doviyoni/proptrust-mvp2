@@ -1026,290 +1026,214 @@ overflow: hidden;
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://ybpefgbezelkmocrepkt.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_DmUNfsrfSGjcqN89HH-CnQ_SEqhBZ-g';
+  const SUPABASE_URL = 'https://ybpefgbezelkmocrepkt.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_DmUNfsrfSGjcqN89HH-CnQ_SEqhBZ-g';
 
-    const form = document.getElementById('leadForm');
-    const statusEl = document.getElementById('formStatus');
-    const submitBtn = document.getElementById('submitBtn');
-    const homePropertiesGrid = document.getElementById('homePropertiesGrid');
-    const heroBrokerCount = document.getElementById('heroBrokerCount');
-    const heroPropertyCount = document.getElementById('heroPropertyCount');
+  const form = document.getElementById('leadForm');
+  const statusEl = document.getElementById('formStatus');
+  const submitBtn = document.getElementById('submitBtn');
+  const homePropertiesGrid = document.getElementById('homePropertiesGrid');
+  const heroBrokerCount = document.getElementById('heroBrokerCount');
+  const heroPropertyCount = document.getElementById('heroPropertyCount');
 
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
 
-    async function loadHeroCounts() {
-      try {
-        const [brokersRes, propertiesRes] = await Promise.all([
-          fetch(`${SUPABASE_URL}/rest/v1/brokers?select=id`, {
-            headers: {
-              'apikey': SUPABASE_ANON_KEY,
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-            }
-          }),
-          fetch(`${SUPABASE_URL}/rest/v1/properties?select=id&status=eq.פורסם`, {
-            headers: {
-              'apikey': SUPABASE_ANON_KEY,
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-            }
-          })
-        ]);
+  async function loadHeroCounts() {
+    try {
+      const [brokersRes, propertiesRes] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/brokers?select=id`, {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        }),
+        fetch(`${SUPABASE_URL}/rest/v1/properties?select=id&status=eq.פורסם`, {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        })
+      ]);
 
-        if (brokersRes.ok) {
-          const brokers = await brokersRes.json();
-          heroBrokerCount.textContent = brokers.length;
-        }
-
-        if (propertiesRes.ok) {
-          const properties = await propertiesRes.json();
-          heroPropertyCount.textContent = properties.length;
-        }
-      } catch (err) {
+      if (brokersRes.ok) {
+        const brokers = await brokersRes.json();
+        heroBrokerCount.textContent = brokers.length;
+      } else {
         heroBrokerCount.textContent = '—';
+      }
+
+      if (propertiesRes.ok) {
+        const properties = await propertiesRes.json();
+        heroPropertyCount.textContent = properties.length;
+      } else {
         heroPropertyCount.textContent = '—';
       }
+    } catch (err) {
+      heroBrokerCount.textContent = '—';
+      heroPropertyCount.textContent = '—';
     }
+  }
 
-    async function loadHomeProperties() {
-  if (!homePropertiesGrid) return;
+  async function loadHomeProperties() {
+    if (!homePropertiesGrid) return;
 
-  homePropertiesGrid.innerHTML = `
-    <div class="property-empty">
-      <h3>טוען נכסים...</h3>
-      <p class="section-desc">מושך את הנתונים מהמערכת.</p>
-    </div>
-  `;
-
-  try {
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/properties?select=title,city,price,yield_estimate,has_360,verified,status,property_type,bedrooms,size_sqm,image_url&status=eq.פורסם&order=created_at.desc&limit=6`,
-      {
-        method: 'GET',
-        headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
-        }
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to load properties');
-    }
-
-    const properties = await response.json();
-
-    if (!properties.length) {
-      homePropertiesGrid.innerHTML = `
-        <div class="property-empty">
-          <h3>עדיין אין נכסים זמינים</h3>
-          <p class="section-desc">ברגע שיוזנו נכסים שפורסמו במערכת, הם יופיעו כאן.</p>
-        </div>
-      `;
-      return;
-    }
-
-    const cardsHtml = properties.map((property) => {
-      const imageHtml = property.image_url
-        ? `<img src="${escapeHtml(property.image_url)}" alt="${escapeHtml(property.title)}" class="property-image">`
-        : '';
-
-      return `
-        <article class="property-card">
-          <div class="property-visual">
-            ${imageHtml}
-            <div class="property-visual-overlay"></div>
-            <div class="property-badges">
-              <span class="property-badge primary">${property.verified ? 'מאומת' : 'בתהליך אימות'}</span>
-              <span class="property-badge">${property.has_360 ? 'כולל 360°' : 'ללא 360°'}</span>
-            </div>
-            <div class="property-badge">${escapeHtml(property.property_type || 'נכס')}</div>
-          </div>
-
-          <div class="property-content">
-            <div>
-              <h3 class="property-title">${escapeHtml(property.title)}</h3>
-              <p class="property-sub">${escapeHtml(property.city || '-')} • ${escapeHtml(property.price || '-')}</p>
-            </div>
-
-            <div class="property-metrics">
-              <div class="metric">
-                <div class="metric-label">תשואה משוערת</div>
-                <div class="metric-value">${escapeHtml(property.yield_estimate || '-')}</div>
-              </div>
-
-              <div class="metric">
-                <div class="metric-label">חדרים</div>
-                <div class="metric-value">${escapeHtml(property.bedrooms || '-')}</div>
-              </div>
-
-              <div class="metric">
-                <div class="metric-label">גודל במ״ר</div>
-                <div class="metric-value">${escapeHtml(property.size_sqm || '-')}</div>
-              </div>
-
-              <div class="metric">
-                <div class="metric-label">סטטוס</div>
-                <div class="metric-value">${escapeHtml(property.status || '-')}</div>
-              </div>
-            </div>
-
-            <div class="chips" style="margin-top:auto;">
-              <div class="chip">נראות גבוהה</div>
-              <div class="chip">השוואה מושווית</div>
-            </div>
-          </div>
-        </article>
-      `;
-    }).join('');
-
-    homePropertiesGrid.innerHTML = cardsHtml;
-  } catch (err) {
     homePropertiesGrid.innerHTML = `
-      <div class="property-error">
-        <h3>שגיאה בטעינת נכסים</h3>
-        <p class="section-desc">לא ניתן למשוך כרגע את הנתונים מהמערכת.</p>
+      <div class="property-empty">
+        <h3>טוען נכסים...</h3>
+        <p class="section-desc">מושך את הנתונים מהמערכת.</p>
       </div>
     `;
-  }
-}
 
-        if (!response.ok) {
-          throw new Error('Failed to load properties');
+    try {
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/properties?select=title,city,price,yield_estimate,has_360,verified,status,property_type,bedrooms,size_sqm,image_url&status=eq.פורסם&order=created_at.desc&limit=6`,
+        {
+          method: 'GET',
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+          }
         }
+      );
 
-        const properties = await response.json();
+      if (!response.ok) {
+        throw new Error('Failed to load properties');
+      }
 
-        if (!properties.length) {
-          homePropertiesGrid.innerHTML = `
-            <div class="property-empty">
-              <h3>עדיין אין נכסים זמינים</h3>
-              <p class="section-desc">ברגע שיוזנו נכסים שפורסמו במערכת, הם יופיעו כאן.</p>
-            </div>
-          `;
-          return;
-        }
+      const properties = await response.json();
 
-        homePropertiesGrid.innerHTML = properties.map((property) => {
-  const imageHtml = property.image_url
-    ? `<img src="${escapeHtml(property.image_url)}" alt="${escapeHtml(property.title)}" class="property-image" />`
-    : '';
-
-  return `
-    <article class="property-card">
-      <div class="property-visual">
-        ${imageHtml}
-        <div class="property-visual-overlay"></div>
-        <div class="property-badges">
-          <span class="property-badge primary">${property.verified ? 'מאומת' : 'בתהליך אימות'}</span>
-          <span class="property-badge">${property.has_360 ? 'כולל 360°' : 'ללא 360°'}</span>
-        </div>
-        <div class="property-badge">${escapeHtml(property.property_type || 'נכס')}</div>
-      </div>
-
-      <div class="property-content">
-        <div>
-          <h3 class="property-title">${escapeHtml(property.title)}</h3>
-          <p class="property-sub">${escapeHtml(property.city || '-')} • ${escapeHtml(property.price || '-')}</p>
-        </div>
-
-        <div class="property-metrics">
-          <div class="metric">
-            <div class="metric-label">תשואה משוערת</div>
-            <div class="metric-value">${escapeHtml(property.yield_estimate || '-')}</div>
-          </div>
-
-          <div class="metric">
-            <div class="metric-label">חדרים</div>
-            <div class="metric-value">${escapeHtml(property.bedrooms || '-')}</div>
-          </div>
-
-          <div class="metric">
-            <div class="metric-label">גודל במ״ר</div>
-            <div class="metric-value">${escapeHtml(property.size_sqm || '-')}</div>
-          </div>
-
-          <div class="metric">
-            <div class="metric-label">סטטוס</div>
-            <div class="metric-value">${escapeHtml(property.status || '-')}</div>
-          </div>
-        </div>
-
-        <div class="chips" style="margin-top:auto;">
-          <div class="chip">נראות גבוהה</div>
-          <div class="chip">השוואה מושווית</div>
-        </div>
-      </div>
-    </article>
-  `;
-}).join('');
-      } catch (err) {
+      if (!properties.length) {
         homePropertiesGrid.innerHTML = `
-          <div class="property-error">
-            <h3>שגיאה בטעינת נכסים</h3>
-            <p class="section-desc">לא ניתן למשוך כרגע את הנתונים מהמערכת.</p>
+          <div class="property-empty">
+            <h3>עדיין אין נכסים זמינים</h3>
+            <p class="section-desc">ברגע שיוזנו נכסים שפורסמו במערכת, הם יופיעו כאן.</p>
           </div>
         `;
+        return;
       }
+
+      const cardsHtml = properties.map((property) => {
+        const imageHtml = property.image_url
+          ? `<img src="${escapeHtml(property.image_url)}" alt="${escapeHtml(property.title)}" class="property-image">`
+          : '';
+
+        return `
+          <article class="property-card">
+            <div class="property-visual">
+              ${imageHtml}
+              <div class="property-visual-overlay"></div>
+              <div class="property-badges">
+                <span class="property-badge primary">${property.verified ? 'מאומת' : 'בתהליך אימות'}</span>
+                <span class="property-badge">${property.has_360 ? 'כולל 360°' : 'ללא 360°'}</span>
+              </div>
+              <div class="property-badge">${escapeHtml(property.property_type || 'נכס')}</div>
+            </div>
+
+            <div class="property-content">
+              <div>
+                <h3 class="property-title">${escapeHtml(property.title)}</h3>
+                <p class="property-sub">${escapeHtml(property.city || '-')} • ${escapeHtml(property.price || '-')}</p>
+              </div>
+
+              <div class="property-metrics">
+                <div class="metric">
+                  <div class="metric-label">תשואה משוערת</div>
+                  <div class="metric-value">${escapeHtml(property.yield_estimate || '-')}</div>
+                </div>
+
+                <div class="metric">
+                  <div class="metric-label">חדרים</div>
+                  <div class="metric-value">${escapeHtml(property.bedrooms || '-')}</div>
+                </div>
+
+                <div class="metric">
+                  <div class="metric-label">גודל במ״ר</div>
+                  <div class="metric-value">${escapeHtml(property.size_sqm || '-')}</div>
+                </div>
+
+                <div class="metric">
+                  <div class="metric-label">סטטוס</div>
+                  <div class="metric-value">${escapeHtml(property.status || '-')}</div>
+                </div>
+              </div>
+
+              <div class="chips" style="margin-top:auto;">
+                <div class="chip">נראות גבוהה</div>
+                <div class="chip">השוואה מושווית</div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      homePropertiesGrid.innerHTML = cardsHtml;
+    } catch (err) {
+      homePropertiesGrid.innerHTML = `
+        <div class="property-error">
+          <h3>שגיאה בטעינת נכסים</h3>
+          <p class="section-desc">לא ניתן למשוך כרגע את הנתונים מהמערכת.</p>
+        </div>
+      `;
     }
+  }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-      statusEl.textContent = 'שולח...';
-      statusEl.className = 'form-status';
-      submitBtn.disabled = true;
+    statusEl.textContent = 'שולח...';
+    statusEl.className = 'form-status';
+    submitBtn.disabled = true;
 
-      const formData = new FormData(form);
-      const payload = {
-        full_name: formData.get('full_name') || '',
-        phone: formData.get('phone') || '',
-        email: formData.get('email') || '',
-        city: formData.get('city') || '',
-        budget: formData.get('budget') || '',
-        lead_type: formData.get('lead_type') || 'משקיע',
-        notes: formData.get('notes') || '',
-        source: 'website',
-        stage: 'חדש',
-        status: 'חדש'
-      };
+    const formData = new FormData(form);
+    const payload = {
+      full_name: formData.get('full_name') || '',
+      phone: formData.get('phone') || '',
+      email: formData.get('email') || '',
+      city: formData.get('city') || '',
+      budget: formData.get('budget') || '',
+      lead_type: formData.get('lead_type') || 'משקיע',
+      notes: formData.get('notes') || '',
+      source: 'website',
+      stage: 'חדש',
+      status: 'חדש'
+    };
 
-      try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            'Prefer': 'return=representation'
-          },
-          body: JSON.stringify(payload)
-        });
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          Prefer: 'return=representation'
+        },
+        body: JSON.stringify(payload)
+      });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(errorText || 'Failed to save lead');
-        }
-
-        form.reset();
-        statusEl.textContent = 'הפרטים נשלחו בהצלחה.';
-        statusEl.className = 'form-status success';
-      } catch (err) {
-        statusEl.textContent = 'השליחה נכשלה. נסה שוב.';
-        statusEl.className = 'form-status error';
-      } finally {
-        submitBtn.disabled = false;
+      if (!response.ok) {
+        throw new Error('Failed to save lead');
       }
-    });
 
-    loadHomeProperties();
-    loadHeroCounts();
-  </script>
+      form.reset();
+      statusEl.textContent = 'הפרטים נשלחו בהצלחה.';
+      statusEl.className = 'form-status success';
+    } catch (err) {
+      statusEl.textContent = 'השליחה נכשלה. נסה שוב.';
+      statusEl.className = 'form-status error';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  loadHomeProperties();
+  loadHeroCounts();
+</script>
 </body>
 </html>
