@@ -198,6 +198,7 @@
       <a href="#">משימות</a>
       <a href="#">אוטומציות</a>
       <a href="/index.html">חזרה לאתר</a>
+      <a href="#" onclick="logout()">התנתקות</a>
     </aside>
 
     <main class="main">
@@ -258,6 +259,11 @@
         if (localStorage.getItem('proptrust_logged_in') !== 'true') {
       window.location.href = '/login.html';
     }
+    function logout() {
+  localStorage.removeItem('proptrust_logged_in');
+  localStorage.removeItem('proptrust_user_email');
+  window.location.href = '/login.html';
+}
     const SUPABASE_URL = 'https://ybpefgbezelkmocrepkt.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_DmUNfsrfSGjcqN89HH-CnQ_SEqhBZ-g';
 
