@@ -5,225 +5,933 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PropTrust</title>
   <style>
+    :root {
+      --bg: #f3f7fb;
+      --surface: rgba(255,255,255,0.82);
+      --surface-strong: #ffffff;
+      --text: #0f172a;
+      --muted: #5b6b82;
+      --line: rgba(148,163,184,0.18);
+      --primary: #0f172a;
+      --primary-2: #1d4ed8;
+      --success: #16a34a;
+      --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.10);
+      --shadow-md: 0 14px 30px rgba(15, 23, 42, 0.08);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background:
-    radial-gradient(circle at top right, rgba(59,130,246,0.10), transparent 20%),
-    linear-gradient(180deg, #f8fbff 0%, #f8fafc 100%);
-  color: #0f172a;
-}
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 18%),
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.10), transparent 18%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+    }
+
+    a {
+      color: inherit;
+    }
+
     .container {
-      max-width: 1100px;
+      width: min(1180px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 24px;
     }
-    .hero {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-  border-radius: 32px;
-  padding: 56px 36px;
-  margin-top: 24px;
-  box-shadow: 0 20px 50px rgba(15,23,42,0.08);
-  border: 1px solid rgba(148,163,184,0.16);
-}
-    h1 {
-  font-size: 52px;
-  line-height: 1.1;
-  margin: 0 0 16px;
-  max-width: 900px;
-}
-    p {
-      font-size: 20px;
-      line-height: 1.7;
-      color: #475569;
+
+    .site-shell {
+      padding: 22px 0 48px;
     }
-    .buttons {
-      margin-top: 24px;
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .topbar-inner {
+      margin-top: 8px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(148,163,184,0.14);
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(15,23,42,0.06);
+      padding: 12px 18px;
       display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
       gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: bold;
+      box-shadow: 0 10px 24px rgba(15,23,42,0.18);
+      flex: 0 0 auto;
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       flex-wrap: wrap;
     }
-    .btn {
-      display: inline-block;
-      padding: 14px 22px;
-      border-radius: 14px;
+
+    .ghost-link {
       text-decoration: none;
-      font-weight: bold;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 4px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
       border: 0;
       cursor: pointer;
+      padding: 14px 22px;
+      border-radius: 16px;
+      font-size: 15px;
+      font-weight: 700;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
     }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
     .btn-primary {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: white;
-  box-shadow: 0 10px 24px rgba(15,23,42,0.18);
-}
+      color: #fff;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      box-shadow: 0 14px 28px rgba(15,23,42,0.16);
+    }
+
     .btn-secondary {
-  background: rgba(255,255,255,0.85);
-  color: #0f172a;
-  border: 1px solid #cbd5e1;
-}
-    .grid {
+      color: var(--text);
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(148,163,184,0.24);
+      box-shadow: 0 8px 18px rgba(15,23,42,0.05);
+    }
+
+    .hero {
+      margin-top: 22px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(248,251,255,0.92) 100%);
+      border: 1px solid rgba(148,163,184,0.14);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 85% 18%, rgba(37,99,235,0.10), transparent 18%),
+        radial-gradient(circle at 12% 88%, rgba(14,165,233,0.09), transparent 16%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: relative;
+      z-index: 1;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      align-items: stretch;
+      padding: 34px;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      align-self: flex-start;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(37,99,235,0.08);
+      color: #1e40af;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -1.5px;
+      max-width: 760px;
+    }
+
+    .hero p {
+      margin: 18px 0 0;
+      font-size: 21px;
+      line-height: 1.8;
+      color: #44546c;
+      max-width: 760px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
       margin-top: 28px;
     }
-    .card {
-      background: white;
-      border-radius: 18px;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+
+    .hero-points {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 24px;
     }
-    .section {
-      margin-top: 32px;
+
+    .point {
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(148,163,184,0.14);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(15,23,42,0.04);
     }
-    .section h2 {
-      font-size: 30px;
-      margin-bottom: 12px;
+
+    .point-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
     }
-    .small {
-      color: #64748b;
-      font-size: 16px;
+
+    .point-text {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
     }
-    .form-wrap {
-      margin-top: 32px;
-      background: white;
-      border-radius: 24px;
+
+    .hero-right {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .hero-side-card {
+      width: 100%;
+      background: linear-gradient(180deg, #0f172a 0%, #172554 100%);
+      color: #fff;
+      border-radius: 28px;
       padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      box-shadow: 0 22px 40px rgba(15,23,42,0.22);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100%;
     }
+
+    .side-badge {
+      display: inline-flex;
+      align-self: flex-start;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .side-title {
+      font-size: 30px;
+      line-height: 1.15;
+      font-weight: 700;
+      margin-top: 16px;
+      margin-bottom: 10px;
+    }
+
+    .side-text {
+      color: rgba(255,255,255,0.78);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .mini-stats {
+      margin-top: 22px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .mini-stat {
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .mini-stat-label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.72);
+    }
+
+    .mini-stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .section {
+      margin-top: 34px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 18px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .section-kicker {
+      font-size: 13px;
+      color: #1e40af;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-size: 34px;
+      line-height: 1.15;
+      margin: 0;
+    }
+
+    .section-desc {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.8;
+      max-width: 760px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(148,163,184,0.18);
+      font-size: 13px;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: rgba(255,255,255,0.82);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148,163,184,0.14);
+      box-shadow: var(--shadow-md);
+      padding: 22px;
+    }
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(14,165,233,0.10));
+      color: #1e40af;
+      font-size: 22px;
+      margin-bottom: 14px;
+    }
+
+    .feature-title {
+      font-size: 20px;
+      margin: 0 0 8px;
+    }
+
+    .feature-text {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+      margin: 0;
+    }
+
+    .property-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .property-card {
+      background: rgba(255,255,255,0.88);
+      border: 1px solid rgba(148,163,184,0.14);
+      border-radius: 26px;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .property-visual {
+      height: 180px;
+      background:
+        linear-gradient(135deg, rgba(30,64,175,0.10), rgba(14,165,233,0.10)),
+        linear-gradient(180deg, #f8fbff 0%, #eef5fb 100%);
+      border-bottom: 1px solid rgba(148,163,184,0.12);
+      padding: 18px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .property-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .property-badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(255,255,255,0.86);
+      color: #0f172a;
+      border: 1px solid rgba(148,163,184,0.14);
+    }
+
+    .property-badge.primary {
+      background: rgba(37,99,235,0.10);
+      color: #1d4ed8;
+      border-color: rgba(37,99,235,0.12);
+    }
+
+    .property-content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .property-title {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.2;
+    }
+
+    .property-sub {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .property-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      background: #f8fbff;
+      border: 1px solid rgba(148,163,184,0.12);
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .property-empty,
+    .property-error {
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(148,163,184,0.14);
+      border-radius: 24px;
+      box-shadow: var(--shadow-md);
+      padding: 24px;
+    }
+
+    .lead-wrap {
+      margin-top: 38px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(248,251,255,0.92) 100%);
+      border: 1px solid rgba(148,163,184,0.14);
+      border-radius: 30px;
+      box-shadow: var(--shadow-lg);
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lead-wrap::before {
+      content: "";
+      position: absolute;
+      inset: auto auto -80px -60px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(37,99,235,0.14), transparent 65%);
+      pointer-events: none;
+    }
+
+    .lead-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .lead-title {
+      margin: 6px 0 0;
+      font-size: 34px;
+      line-height: 1.15;
+    }
+
+    .lead-desc {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.8;
+      margin: 10px 0 0;
+      max-width: 720px;
+    }
+
+    .lead-tag {
+      background: rgba(16,185,129,0.10);
+      color: #047857;
+      border: 1px solid rgba(16,185,129,0.14);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
-      margin-top: 18px;
+      position: relative;
+      z-index: 1;
     }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+    }
+
     input, select, textarea {
       width: 100%;
       box-sizing: border-box;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid #cbd5e1;
-      font-size: 16px;
-      background: white;
+      padding: 15px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(148,163,184,0.22);
+      background: rgba(255,255,255,0.94);
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
     }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(37,99,235,0.5);
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.10);
+    }
+
     textarea {
-      min-height: 110px;
+      min-height: 120px;
       resize: vertical;
     }
-    .full {
-      grid-column: 1 / -1;
+
+    .form-actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      position: relative;
+      z-index: 1;
     }
-    .status {
-      margin-top: 14px;
-      font-size: 15px;
+
+    .form-status {
+      font-size: 14px;
       color: #334155;
+      font-weight: 700;
     }
-    .success {
+
+    .form-status.success {
       color: #166534;
     }
-    .error {
+
+    .form-status.error {
       color: #b91c1c;
+    }
+
+    .footer-space {
+      height: 28px;
+    }
+
+    @media (max-width: 1100px) {
+      h1 {
+        font-size: 52px;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .property-grid,
+      .features-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .container {
+        width: min(100% - 20px, 1180px);
+      }
+
+      .topbar-inner {
+        border-radius: 26px;
+        align-items: flex-start;
+      }
+
+      .top-actions {
+        width: 100%;
+      }
+
+      .hero-grid {
+        padding: 22px;
+      }
+
+      .hero {
+        border-radius: 26px;
+      }
+
+      h1 {
+        font-size: 40px;
+        line-height: 1.08;
+      }
+
+      .hero p {
+        font-size: 18px;
+      }
+
+      .hero-points,
+      .features-grid,
+      .property-grid,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title,
+      .lead-title {
+        font-size: 28px;
+      }
+
+      .lead-wrap {
+        padding: 22px;
+        border-radius: 24px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="hero">
-      <div class="small">PropTrust MVP</div>
-      <h1>נכסים להשקעה עם יותר אמון, יותר שקיפות ופחות סימני שאלה</h1>
-      <p>
-        פלטפורמה שמחברת בין משקיעים למתווכים מורשים בלבד,
-        עם הצגת נכס אחידה, וידאו, 360° ושכבת אמינות שמאפשרת
-        לקבל החלטה טובה יותר גם מרחוק.
-      </p>
+  <div class="site-shell">
+    <div class="topbar">
+      <div class="container">
+        <div class="topbar-inner">
+          <div class="brand">
+            <div class="brand-mark">PT</div>
+            <div class="brand-text">
+              <div class="brand-title">PropTrust</div>
+              <div class="brand-subtitle">פלטפורמת אמון להשקעות נדל״ן מרחוק</div>
+            </div>
+          </div>
 
-      <div class="buttons">
-        <a href="#lead-form" class="btn btn-primary">אני משקיע</a>
-        <a href="/login.html" class="btn btn-secondary">כניסה למערכת</a>
-      </div>
-
-      <div class="grid" id="homePropertiesGrid">
-  <div class="card">
-    <h3>טוען נכסים...</h3>
-    <p class="small">מושך את הנתונים מהמערכת.</p>
-  </div>
-</div>
-        <div class="card">
-          <h3>סיורי וידאו ו-360°</h3>
-          <p class="small">הצגת נכס עשירה יותר גם למשקיע שלא נמצא פיזית.</p>
-        </div>
-        <div class="card">
-          <h3>השוואה קלה בין נכסים</h3>
-          <p class="small">מבנה אחיד שעוזר להבין מהר מה מתאים.</p>
+          <div class="top-actions">
+            <a class="ghost-link" href="#properties">נכסים</a>
+            <a class="ghost-link" href="#how-it-works">איך זה עובד</a>
+            <a class="ghost-link" href="#lead-form">השארת פרטים</a>
+            <a href="/login.html" class="btn btn-secondary">כניסה למערכת</a>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="section">
-      <h2>איך זה עובד</h2>
-      <div class="grid">
-        <div class="card">
-          <h3>1. מתווך נרשם</h3>
-          <p class="small">העלאת פרטי משרד ורישיון תיווך.</p>
-        </div>
-        <div class="card">
-          <h3>2. הנכס עולה</h3>
-          <p class="small">תמונות, סרטון, 360° ופרטי נכס.</p>
-        </div>
-        <div class="card">
-          <h3>3. משקיע בוחן</h3>
-          <p class="small">צפייה מסודרת עם יותר שקיפות ואמון.</p>
-        </div>
-      </div>
-    </div>
+    <div class="container">
+      <section class="hero">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="eyebrow">PropTrust MVP · השקעה חכמה יותר</div>
+            <h1>נכסים להשקעה עם יותר אמון, יותר שקיפות ופחות סימני שאלה</h1>
+            <p>
+              פלטפורמה שמחברת בין משקיעים למתווכים מורשים בלבד, עם הצגת נכס אחידה,
+              360°, וידאו ושכבת אמינות שמאפשרת לקבל החלטה טובה יותר גם מרחוק.
+            </p>
 
-    <div class="form-wrap" id="lead-form">
-      <div class="small">השארת פרטים</div>
-      <h2 style="margin-top:8px;">רוצה לשמוע על נכסים להשקעה?</h2>
-      <p class="small">השאר פרטים ונחזור אליך עם התאמה ראשונית.</p>
+            <div class="hero-actions">
+              <a href="#lead-form" class="btn btn-primary">אני משקיע</a>
+              <a href="#properties" class="btn btn-secondary">לצפייה בנכסים</a>
+            </div>
 
-      <form id="leadForm">
-        <div class="form-grid">
-          <div>
-            <label for="full_name">שם מלא</label>
-            <input id="full_name" name="full_name" required />
+            <div class="hero-points">
+              <div class="point">
+                <div class="point-title">מתווכים מורשים בלבד</div>
+                <div class="point-text">חיבור רק עם גורמים מאומתים שמחזקים את תחושת הביטחון.</div>
+              </div>
+              <div class="point">
+                <div class="point-title">שקיפות למשקיע מרחוק</div>
+                <div class="point-text">מבנה קבוע וברור שמאפשר להבין מהר אם הנכס מתאים.</div>
+              </div>
+              <div class="point">
+                <div class="point-title">360° ונתוני בסיס</div>
+                <div class="point-text">הצגת נכס עשירה יותר לפני שיחה, פגישה או ביקור בנכס.</div>
+              </div>
+            </div>
           </div>
-          <div>
-            <label for="phone">טלפון</label>
-            <input id="phone" name="phone" required />
+
+          <div class="hero-right">
+            <div class="hero-side-card">
+              <div>
+                <div class="side-badge">השקעה מרחוק, בלי כאב ראש</div>
+                <div class="side-title">תהליך חכם יותר למשקיע שמחפש ודאות</div>
+                <div class="side-text">
+                  במקום לרדוף אחרי מידע חלקי, אתה מקבל תצוגה אחידה יותר, נכסים רלוונטיים,
+                  ותהליך שמכוון לאמון ולא רק לפרסום.
+                </div>
+              </div>
+
+              <div class="mini-stats">
+                <div class="mini-stat">
+                  <div class="mini-stat-label">גישה לנכסים</div>
+                  <div class="mini-stat-value">24/7</div>
+                </div>
+                <div class="mini-stat">
+                  <div class="mini-stat-label">מתווכים פעילים</div>
+                  <div class="mini-stat-value" id="heroBrokerCount">—</div>
+                </div>
+                <div class="mini-stat">
+                  <div class="mini-stat-label">נכסים שפורסמו</div>
+                  <div class="mini-stat-value" id="heroPropertyCount">—</div>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+      </section>
+
+      <section class="section" id="how-it-works">
+        <div class="section-head">
           <div>
-            <label for="email">אימייל</label>
-            <input id="email" name="email" type="email" />
+            <div class="section-kicker">למה זה עובד טוב יותר</div>
+            <h2 class="section-title">חוויית השקעה שנבנתה לאמון, לא רק לפרסום</h2>
+            <p class="section-desc">
+              במקום עוד לוח גנרי, PropTrust מחבר בין הצגת נכס איכותית,
+              שכבת אמינות ותהליך שמותאם למשקיע שרוצה להבין מהר מה שווה את הזמן שלו.
+            </p>
           </div>
-          <div>
-            <label for="city">עיר מועדפת</label>
-            <input id="city" name="city" />
-          </div>
-          <div>
-            <label for="budget">תקציב</label>
-            <input id="budget" name="budget" placeholder="למשל ₪2,000,000" />
-          </div>
-          <div>
-            <label for="lead_type">סוג פנייה</label>
-            <select id="lead_type" name="lead_type">
-              <option value="משקיע">משקיע</option>
-              <option value="משקיעה">משקיעה</option>
-              <option value="מתווך">מתווך</option>
-            </select>
-          </div>
-          <div class="full">
-            <label for="notes">הערות</label>
-            <textarea id="notes" name="notes" placeholder="מה אתה מחפש? אזור, סוג נכס, תשואה וכדומה"></textarea>
+
+          <div class="chips">
+            <div class="chip">מתווכים מורשים</div>
+            <div class="chip">360°</div>
+            <div class="chip">השוואה קלה</div>
+            <div class="chip">השקעה מרחוק</div>
           </div>
         </div>
 
-        <div class="buttons">
-          <button type="submit" class="btn btn-primary" id="submitBtn">שליחה</button>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">✓</div>
+            <h3 class="feature-title">אמינות גבוהה יותר</h3>
+            <p class="feature-text">
+              נכסים מוצגים במבנה ברור יותר, עם נתוני בסיס שמאפשרים למשקיע להבין מהר יותר את התמונה.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">◔</div>
+            <h3 class="feature-title">סיורים דיגיטליים</h3>
+            <p class="feature-text">
+              שילוב של 360° ויכולת להציג נכס מרחוק יוצרים חוויה עשירה הרבה יותר מהצגת טקסט בלבד.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">₪</div>
+            <h3 class="feature-title">בחינה מהירה של פוטנציאל</h3>
+            <p class="feature-text">
+              עיר, מחיר, תשואה, סטטוס ואימות — כל מה שצריך כדי לבצע סינון ראשוני בצורה חכמה יותר.
+            </p>
+          </div>
         </div>
-        <div id="formStatus" class="status"></div>
-      </form>
+      </section>
+
+      <section class="section" id="properties">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">נכסים במערכת</div>
+            <h2 class="section-title">נכסים אמיתיים שמוזנים ישירות מהמערכת</h2>
+            <p class="section-desc">
+              אלה הנכסים שפורסמו דרך PropTrust. כל כרטיס מציג את המידע המרכזי
+              שהמשקיע צריך כדי להחליט אם להעמיק.
+            </p>
+          </div>
+        </div>
+
+        <div class="property-grid" id="homePropertiesGrid">
+          <div class="property-empty">
+            <h3>טוען נכסים...</h3>
+            <p class="section-desc">מושך את הנתונים מהמערכת.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lead-wrap" id="lead-form">
+        <div class="lead-head">
+          <div>
+            <div class="section-kicker">השארת פרטים</div>
+            <h2 class="lead-title">רוצה לשמוע על נכסים שמתאימים לך?</h2>
+            <p class="lead-desc">
+              השאר פרטים, ואנחנו נחזור אליך עם התאמה ראשונית חכמה יותר לפי אזור, תקציב וסוג פנייה.
+            </p>
+          </div>
+
+          <div class="lead-tag">חזרה מהירה יותר עם מידע רלוונטי יותר</div>
+        </div>
+
+        <form id="leadForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="full_name">שם מלא</label>
+              <input id="full_name" name="full_name" required />
+            </div>
+
+            <div class="field">
+              <label for="phone">טלפון</label>
+              <input id="phone" name="phone" required />
+            </div>
+
+            <div class="field">
+              <label for="email">אימייל</label>
+              <input id="email" name="email" type="email" />
+            </div>
+
+            <div class="field">
+              <label for="city">עיר מועדפת</label>
+              <input id="city" name="city" />
+            </div>
+
+            <div class="field">
+              <label for="budget">תקציב</label>
+              <input id="budget" name="budget" placeholder="למשל ₪2,000,000" />
+            </div>
+
+            <div class="field">
+              <label for="lead_type">סוג פנייה</label>
+              <select id="lead_type" name="lead_type">
+                <option value="משקיע">משקיע</option>
+                <option value="משקיעה">משקיעה</option>
+                <option value="מתווך">מתווך</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label for="notes">הערות</label>
+              <textarea id="notes" name="notes" placeholder="מה אתה מחפש? אזור, סוג נכס, תשואה וכדומה"></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submitBtn">שליחה</button>
+            <div id="formStatus" class="form-status"></div>
+          </div>
+        </form>
+      </section>
+
+      <div class="footer-space"></div>
     </div>
   </div>
 
@@ -235,6 +943,8 @@
     const statusEl = document.getElementById('formStatus');
     const submitBtn = document.getElementById('submitBtn');
     const homePropertiesGrid = document.getElementById('homePropertiesGrid');
+    const heroBrokerCount = document.getElementById('heroBrokerCount');
+    const heroPropertyCount = document.getElementById('heroPropertyCount');
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -245,19 +955,51 @@
         .replaceAll("'", '&#039;');
     }
 
+    async function loadHeroCounts() {
+      try {
+        const [brokersRes, propertiesRes] = await Promise.all([
+          fetch(`${SUPABASE_URL}/rest/v1/brokers?select=id`, {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }),
+          fetch(`${SUPABASE_URL}/rest/v1/properties?select=id&status=eq.פורסם`, {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          })
+        ]);
+
+        if (brokersRes.ok) {
+          const brokers = await brokersRes.json();
+          heroBrokerCount.textContent = brokers.length;
+        }
+
+        if (propertiesRes.ok) {
+          const properties = await propertiesRes.json();
+          heroPropertyCount.textContent = properties.length;
+        }
+      } catch (err) {
+        heroBrokerCount.textContent = '—';
+        heroPropertyCount.textContent = '—';
+      }
+    }
+
     async function loadHomeProperties() {
       if (!homePropertiesGrid) return;
 
       homePropertiesGrid.innerHTML = `
-        <div class="card">
+        <div class="property-empty">
           <h3>טוען נכסים...</h3>
-          <p class="small">מושך את הנתונים מהמערכת.</p>
+          <p class="section-desc">מושך את הנתונים מהמערכת.</p>
         </div>
       `;
 
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/properties?select=title,city,price,yield_estimate,has_360,verified,status&status=eq.פורסם&order=created_at.desc&limit=6`,
+          `${SUPABASE_URL}/rest/v1/properties?select=title,city,price,yield_estimate,has_360,verified,status,property_type,bedrooms,size_sqm&status=eq.פורסם&order=created_at.desc&limit=6`,
           {
             method: 'GET',
             headers: {
@@ -275,36 +1017,69 @@
 
         if (!properties.length) {
           homePropertiesGrid.innerHTML = `
-            <div class="card">
+            <div class="property-empty">
               <h3>עדיין אין נכסים זמינים</h3>
-              <p class="small">ברגע שיוזנו נכסים שפורסמו במערכת, הם יופיעו כאן.</p>
+              <p class="section-desc">ברגע שיוזנו נכסים שפורסמו במערכת, הם יופיעו כאן.</p>
             </div>
           `;
           return;
         }
 
         homePropertiesGrid.innerHTML = properties.map((property) => `
-          <div class="card">
-            <h3>${escapeHtml(property.title)}</h3>
-            <p class="small">${escapeHtml(property.city || '-')} • ${escapeHtml(property.price || '-')}</p>
-            <p class="small">תשואה: ${escapeHtml(property.yield_estimate || '-')}</p>
-            <p class="small">360°: ${property.has_360 ? 'כן' : 'לא'} | אימות: ${property.verified ? 'כן' : 'לא'}</p>
-          </div>
+          <article class="property-card">
+            <div class="property-visual">
+              <div class="property-badges">
+                <span class="property-badge primary">${property.verified ? 'מאומת' : 'בתהליך אימות'}</span>
+                <span class="property-badge">${property.has_360 ? 'כולל 360°' : 'ללא 360°'}</span>
+              </div>
+              <div class="property-badge">${escapeHtml(property.property_type || 'נכס')}</div>
+            </div>
+
+            <div class="property-content">
+              <div>
+                <h3 class="property-title">${escapeHtml(property.title)}</h3>
+                <p class="property-sub">${escapeHtml(property.city || '-')} • ${escapeHtml(property.price || '-')}</p>
+              </div>
+
+              <div class="property-metrics">
+                <div class="metric">
+                  <div class="metric-label">תשואה משוערת</div>
+                  <div class="metric-value">${escapeHtml(property.yield_estimate || '-')}</div>
+                </div>
+
+                <div class="metric">
+                  <div class="metric-label">חדרים</div>
+                  <div class="metric-value">${escapeHtml(property.bedrooms || '-')}</div>
+                </div>
+
+                <div class="metric">
+                  <div class="metric-label">גודל במ״ר</div>
+                  <div class="metric-value">${escapeHtml(property.size_sqm || '-')}</div>
+                </div>
+
+                <div class="metric">
+                  <div class="metric-label">סטטוס</div>
+                  <div class="metric-value">${escapeHtml(property.status || '-')}</div>
+                </div>
+              </div>
+            </div>
+          </article>
         `).join('');
       } catch (err) {
         homePropertiesGrid.innerHTML = `
-          <div class="card">
+          <div class="property-error">
             <h3>שגיאה בטעינת נכסים</h3>
-            <p class="small">לא ניתן למשוך כרגע את הנתונים מהמערכת.</p>
+            <p class="section-desc">לא ניתן למשוך כרגע את הנתונים מהמערכת.</p>
           </div>
         `;
       }
     }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       statusEl.textContent = 'שולח...';
-      statusEl.className = 'status';
+      statusEl.className = 'form-status';
       submitBtn.disabled = true;
 
       const formData = new FormData(form);
@@ -340,15 +1115,17 @@
 
         form.reset();
         statusEl.textContent = 'הפרטים נשלחו בהצלחה.';
-        statusEl.className = 'status success';
+        statusEl.className = 'form-status success';
       } catch (err) {
-        statusEl.textContent = 'השליחה נכשלה. ננסה שוב אחרי שנחבר את הטבלה ב-Supabase.';
-        statusEl.className = 'status error';
+        statusEl.textContent = 'השליחה נכשלה. נסה שוב.';
+        statusEl.className = 'form-status error';
       } finally {
         submitBtn.disabled = false;
       }
     });
-        loadHomeProperties();
+
+    loadHomeProperties();
+    loadHeroCounts();
   </script>
 </body>
 </html>
