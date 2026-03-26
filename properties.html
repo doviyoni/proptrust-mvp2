@@ -247,6 +247,10 @@
               <input id="price" name="price" />
             </div>
             <div>
+  <label for="image_url">קישור לתמונה</label>
+  <input id="image_url" name="image_url" placeholder="https://..." />
+</div>
+            <div>
               <label for="property_type">סוג נכס</label>
               <input id="property_type" name="property_type" placeholder="למשל דירה / פנטהאוז" />
             </div>
@@ -380,6 +384,7 @@
       document.getElementById('city').value = property.city || '';
       document.getElementById('address').value = property.address || '';
       document.getElementById('price').value = property.price || '';
+      document.getElementById('image_url').value = property.image_url || '';
       document.getElementById('property_type').value = property.property_type || '';
       document.getElementById('bedrooms').value = property.bedrooms || '';
       document.getElementById('size_sqm').value = property.size_sqm || '';
@@ -513,6 +518,7 @@
         city: formData.get('city') || '',
         address: formData.get('address') || '',
         price: formData.get('price') || '',
+        image_url: formData.get('image_url') || '',
         property_type: formData.get('property_type') || '',
         bedrooms: formData.get('bedrooms') || '',
         size_sqm: formData.get('size_sqm') || '',

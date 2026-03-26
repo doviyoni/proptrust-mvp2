@@ -440,6 +440,19 @@
 }
 
 .property-visual {
+.property-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.property-visual-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15,23,42,0.10) 0%, rgba(15,23,42,0.30) 100%);
+}
   height: 220px;
   background:
     radial-gradient(circle at top left, rgba(37,99,235,0.16), transparent 28%),
@@ -450,6 +463,8 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  position: relative;
+overflow: hidden;
 }
 
 .property-content {
@@ -1074,8 +1089,7 @@
 
       try {
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/properties?select=title,city,price,yield_estimate,has_360,verified,status,property_type,bedrooms,size_sqm&status=eq.פורסם&order=created_at.desc&limit=6`,
-          {
+`${SUPABASE_URL}/rest/v1/properties?select=title,city,price,yield_estimate,has_360,verified,status,property_type,bedrooms,size_sqm,image_url&status=eq.פורסם&order=created_at.desc&limit=6`          {
             method: 'GET',
             headers: {
               'apikey': SUPABASE_ANON_KEY,
@@ -1103,12 +1117,16 @@
         homePropertiesGrid.innerHTML = properties.map((property) => `
                    <article class="property-card">
             <div class="property-visual">
-              <div class="property-badges">
-                <span class="property-badge primary">${property.verified ? 'מאומת' : 'בתהליך אימות'}</span>
-                <span class="property-badge">${property.has_360 ? 'כולל 360°' : 'ללא 360°'}</span>
-              </div>
-              <div class="property-badge">${escapeHtml(property.property_type || 'נכס')}</div>
-            </div>
+  ${property.image_url
+    ? `<img src="${escapeHtml(property.image_url)}" alt="${escapeHtml(property.title)}" class="property-image" />`
+    : ''}
+  <div class="property-visual-overlay"></div>
+  <div class="property-badges">
+    <span class="property-badge primary">${property.verified ? 'מאומת' : 'בתהליך אימות'}</span>
+    <span class="property-badge">${property.has_360 ? 'כולל 360°' : 'ללא 360°'}</span>
+  </div>
+  <div class="property-badge">${escapeHtml(property.property_type || 'נכס')}</div>
+</div>
 
             <div class="property-content">
               <div>
