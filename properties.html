@@ -247,8 +247,8 @@
               <input id="price" name="price" />
             </div>
             <div>
-  <label for="image_url">קישור לתמונה</label>
-  <input id="image_url" name="image_url" placeholder="https://..." />
+  <label for="image_file">תמונת נכס</label>
+  <input id="image_file" name="image_file" type="file" accept="image/*" />
 </div>
             <div>
               <label for="property_type">סוג נכס</label>
@@ -384,7 +384,6 @@
       document.getElementById('city').value = property.city || '';
       document.getElementById('address').value = property.address || '';
       document.getElementById('price').value = property.price || '';
-      document.getElementById('image_url').value = property.image_url || '';
       document.getElementById('property_type').value = property.property_type || '';
       document.getElementById('bedrooms').value = property.bedrooms || '';
       document.getElementById('size_sqm').value = property.size_sqm || '';
@@ -511,14 +510,21 @@
 
       const formData = new FormData(propertyForm);
       const propertyId = formData.get('property_id');
-
+const imageFile = formData.get('image_file');
+let imageUrl = '';
+if (imageFile && imageFile.size > 0) {
+  imageUrl = await uploadPropertyImage(imageFile);
+} else if (propertyId) {
+  const existingProperty = propertiesCache.find((p) => Number(p.id) === Number(propertyId));
+  imageUrl = existingProperty?.image_url || '';
+}
       const payload = {
         broker_id: Number(formData.get('broker_id')),
         title: formData.get('title') || '',
         city: formData.get('city') || '',
         address: formData.get('address') || '',
         price: formData.get('price') || '',
-        image_url: formData.get('image_url') || '',
+        image_url: imageUrl,
         property_type: formData.get('property_type') || '',
         bedrooms: formData.get('bedrooms') || '',
         size_sqm: formData.get('size_sqm') || '',
@@ -560,7 +566,32 @@
         formStatus.className = 'status-line error';
       }
     });
+async function uploadPropertyImage(file) {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+  const filePath = fileName;
 
+  const uploadResponse = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/property-images/${filePath}`,
+    {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': file.type || 'application/octet-stream',
+        'x-upsert': 'false'
+      },
+      body: file
+    }
+  );
+
+  if (!uploadResponse.ok) {
+    const errorText = await uploadResponse.text();
+    throw new Error(errorText || 'Failed to upload image');
+  }
+
+  return `${SUPABASE_URL}/storage/v1/object/public/property-images/${filePath}`;
+}
     async function initPage() {
       await loadBrokersForSelect();
       await loadProperties();
