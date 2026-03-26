@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PropTrust Login</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    .small {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: 34px;
+    }
+    p {
+      color: #475569;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .form-group {
+      margin-top: 16px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #334155;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      font-size: 15px;
+      background: white;
+    }
+    .btn {
+      width: 100%;
+      margin-top: 20px;
+      background: #0f172a;
+      color: white;
+      border: none;
+      padding: 14px 18px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 15px;
+    }
+    .status {
+      margin-top: 14px;
+      font-size: 14px;
+      color: #475569;
+    }
+    .error {
+      color: #b91c1c;
+    }
+    .success {
+      color: #166534;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="small">PropTrust Admin</div>
+    <h1>כניסה למערכת</h1>
+    <p>התחבר כדי להיכנס ל-CRM, לניהול המתווכים ולניהול הנכסים.</p>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">אימייל</label>
+        <input id="email" name="email" type="email" required />
+      </div>
+
+      <div class="form-group">
+        <label for="password">סיסמה</label>
+        <input id="password" name="password" type="password" required />
+      </div>
+
+      <button type="submit" class="btn">כניסה</button>
+      <div id="loginStatus" class="status"></div>
+    </form>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://ybpefgbezelkmocrepkt.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_DmUNfsrfSGjcqN89HH-CnQ_SEqhBZ-g';
+
+    const loginForm = document.getElementById('loginForm');
+    const loginStatus = document.getElementById('loginStatus');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      loginStatus.textContent = 'בודק פרטים...';
+      loginStatus.className = 'status';
+
+      const formData = new FormData(loginForm);
+      const email = formData.get('email');
+      const password = formData.get('password');
+
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/admin_users?select=*&email=eq.${encodeURIComponent(email)}&password=eq.${encodeURIComponent(password)}&status=eq.active`,
+          {
+            method: 'GET',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Login failed');
+        }
+
+        const users = await response.json();
+
+        if (!users.length) {
+          loginStatus.textContent = 'אימייל או סיסמה לא נכונים.';
+          loginStatus.className = 'status error';
+          return;
+        }
+
+        localStorage.setItem('proptrust_logged_in', 'true');
+        localStorage.setItem('proptrust_user_email', email);
+
+        loginStatus.textContent = 'הכניסה הצליחה. מעביר למערכת...';
+        loginStatus.className = 'status success';
+
+        setTimeout(() => {
+          window.location.href = '/crm.html';
+        }, 700);
+      } catch (err) {
+        loginStatus.textContent = 'הכניסה נכשלה.';
+        loginStatus.className = 'status error';
+      }
+    });
+  </script>
+</body>
+</html>
