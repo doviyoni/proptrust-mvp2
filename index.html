@@ -1078,25 +1078,107 @@ overflow: hidden;
     }
 
     async function loadHomeProperties() {
-      if (!homePropertiesGrid) return;
+  if (!homePropertiesGrid) return;
 
+  homePropertiesGrid.innerHTML = `
+    <div class="property-empty">
+      <h3>טוען נכסים...</h3>
+      <p class="section-desc">מושך את הנתונים מהמערכת.</p>
+    </div>
+  `;
+
+  try {
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/properties?select=title,city,price,yield_estimate,has_360,verified,status,property_type,bedrooms,size_sqm,image_url&status=eq.פורסם&order=created_at.desc&limit=6`,
+      {
+        method: 'GET',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to load properties');
+    }
+
+    const properties = await response.json();
+
+    if (!properties.length) {
       homePropertiesGrid.innerHTML = `
         <div class="property-empty">
-          <h3>טוען נכסים...</h3>
-          <p class="section-desc">מושך את הנתונים מהמערכת.</p>
+          <h3>עדיין אין נכסים זמינים</h3>
+          <p class="section-desc">ברגע שיוזנו נכסים שפורסמו במערכת, הם יופיעו כאן.</p>
         </div>
       `;
+      return;
+    }
 
-      try {
-        const response = await fetch(
-`${SUPABASE_URL}/rest/v1/properties?select=title,city,price,yield_estimate,has_360,verified,status,property_type,bedrooms,size_sqm,image_url&status=eq.פורסם&order=created_at.desc&limit=6`          {
-            method: 'GET',
-            headers: {
-              'apikey': SUPABASE_ANON_KEY,
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-            }
-          }
-        );
+    const cardsHtml = properties.map((property) => {
+      const imageHtml = property.image_url
+        ? `<img src="${escapeHtml(property.image_url)}" alt="${escapeHtml(property.title)}" class="property-image">`
+        : '';
+
+      return `
+        <article class="property-card">
+          <div class="property-visual">
+            ${imageHtml}
+            <div class="property-visual-overlay"></div>
+            <div class="property-badges">
+              <span class="property-badge primary">${property.verified ? 'מאומת' : 'בתהליך אימות'}</span>
+              <span class="property-badge">${property.has_360 ? 'כולל 360°' : 'ללא 360°'}</span>
+            </div>
+            <div class="property-badge">${escapeHtml(property.property_type || 'נכס')}</div>
+          </div>
+
+          <div class="property-content">
+            <div>
+              <h3 class="property-title">${escapeHtml(property.title)}</h3>
+              <p class="property-sub">${escapeHtml(property.city || '-')} • ${escapeHtml(property.price || '-')}</p>
+            </div>
+
+            <div class="property-metrics">
+              <div class="metric">
+                <div class="metric-label">תשואה משוערת</div>
+                <div class="metric-value">${escapeHtml(property.yield_estimate || '-')}</div>
+              </div>
+
+              <div class="metric">
+                <div class="metric-label">חדרים</div>
+                <div class="metric-value">${escapeHtml(property.bedrooms || '-')}</div>
+              </div>
+
+              <div class="metric">
+                <div class="metric-label">גודל במ״ר</div>
+                <div class="metric-value">${escapeHtml(property.size_sqm || '-')}</div>
+              </div>
+
+              <div class="metric">
+                <div class="metric-label">סטטוס</div>
+                <div class="metric-value">${escapeHtml(property.status || '-')}</div>
+              </div>
+            </div>
+
+            <div class="chips" style="margin-top:auto;">
+              <div class="chip">נראות גבוהה</div>
+              <div class="chip">השוואה מושווית</div>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    homePropertiesGrid.innerHTML = cardsHtml;
+  } catch (err) {
+    homePropertiesGrid.innerHTML = `
+      <div class="property-error">
+        <h3>שגיאה בטעינת נכסים</h3>
+        <p class="section-desc">לא ניתן למשוך כרגע את הנתונים מהמערכת.</p>
+      </div>
+    `;
+  }
+}
 
         if (!response.ok) {
           throw new Error('Failed to load properties');
